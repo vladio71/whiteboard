@@ -145,7 +145,7 @@ const SideBar = ({setShape, setOption, option}) => {
                          setOpen('')
                      }}>
                     {caption === 'Selection' && open === '' &&
-                    <CaptionOnHover text={'Select'} short={"V, alt + V"}/>
+                    <CaptionOnHover text={'Select'} short={"V, alt + A"}/>
                     }
                     <LuMousePointer2/>
                 </div>
