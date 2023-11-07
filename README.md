@@ -1,12 +1,12 @@
 
 
-#Whiteboard  
+# Whiteboard  
 
  Whiteboard app for sketching, note taking, building mind-maps. That altogether helps think visually and make creative plans and ideas. It can be buggy in some cases.
  
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). 
 
- ###[liveDemo](https://whiteboard-ten-xi.vercel.app/)
+### [liveDemo](https://whiteboard-ten-xi.vercel.app/)
  
 ## Ui Screenshot 
 
