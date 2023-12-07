@@ -463,6 +463,7 @@ export function useCurve(curve, ref, sample, setSample, draw, drawArrow, contain
 
                 }
 
+                if (temp.length < 3) return prev
                 return {
                     ...prev,
                     points: temp,
@@ -701,9 +702,6 @@ export function useCurve(curve, ref, sample, setSample, draw, drawArrow, contain
         } else {
             setEditPoint(cPoint)
         }
-        // setTimeout(()=>{
-        //
-        // },400)
     }
 
 

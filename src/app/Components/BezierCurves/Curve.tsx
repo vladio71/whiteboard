@@ -20,6 +20,8 @@ const Curve = ({curve, isUsable, handleTop, handleBottom}) => {
     const style = useAppSelector(state => selectStyles(state, curve.id, "curves"))
 
 
+    console.log(sample.points)
+
     useEffect(() => {
         setSample({...curve})
     }, [curve.points])
@@ -124,9 +126,9 @@ const Curve = ({curve, isUsable, handleTop, handleBottom}) => {
         isAttached,
         isAttachedBack
     } = useCurve(curve, ref, sample, setSample, draw, drawArrow, container, getBorders, isUsable,
-            handleTop,
-            handleBottom
-        )
+        handleTop,
+        handleBottom
+    )
 
     // useEffect(() => {
     //     if (down) {
