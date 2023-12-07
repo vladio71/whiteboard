@@ -18,8 +18,6 @@ const Drawing = ({isUsed, isUsable}) => {
     const canvasRef = useRef()
     const drawings = useAppSelector(state => state.present.drawing.drawings)
     const brush = useAppSelector(state => state.present.drawing.brush)
-    const renderCanvasRef = useRef()
-
 
 
     const {
@@ -27,8 +25,7 @@ const Drawing = ({isUsed, isUsable}) => {
         handleMove,
         handleUp,
         toggle,
-        getLineWidth,
-        draw,
+        // draw,
     } = useDrawing(brush, canvasRef, ctx, down, setDown)
 
     useEffect(() => {
@@ -38,7 +35,9 @@ const Drawing = ({isUsed, isUsable}) => {
             const ctx = canvas.getContext('2d')
             setContext(ctx)
             window.addEventListener('mousedown', handleDown)
-            window.addEventListener('mousemove', handleMove)
+            if (down) {
+                window.addEventListener('mousemove', handleMove)
+            }
             window.addEventListener('mouseup', handleUp)
             return () => {
 
@@ -51,41 +50,9 @@ const Drawing = ({isUsed, isUsable}) => {
     }, [down, toggle, isUsed, brush, drawings])
 
 
-
-
-    function saveChanges(object) {
-        dispatch(updateDrawing(object))
-    }
-
-    function handleRemoveShape(e, id) {
-        if (e.key === "Backspace" || e.key === "Delete") {
-            dispatch(deleteDrawing(id))
-        }
-
-    }
-
-
     return (
         <>
-
-            {
-                drawings.map(drawObject => {
-                    return(  <RemoveObject key={drawObject.id} handleRemove={handleRemoveShape} id={drawObject.id}>
-                        <ContainerResizeComponent
-                            isUsable={isUsable}
-                            editorObject={drawObject}
-                            saveChanges={saveChanges}
-                            renderProp={() => <Draw draw={draw} selected={drawObject.selected}/>}
-                        />
-                    </RemoveObject>)
-
-                })
-
-            }
-
             <canvas ref={canvasRef}></canvas>
-
-
         </>
 
 

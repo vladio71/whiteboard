@@ -1,7 +1,10 @@
-import {useEffect, useMemo, useState} from "react";
+import {useContext, useEffect, useMemo, useState} from "react";
+import {LevelContext} from "../../page";
 
 
 export const useContainerResize = (editorObject, isUsable, child, container, saveChanges) => {
+
+    const level = useContext(LevelContext)
 
     const [start, setStart] = useState({x: 0, y: 0})
     const [center, setCenter] = useState({
@@ -26,13 +29,24 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
         alignItems: "center",
         left: object.x - 10,
         top: object.y - 10,
-        width: object.w ,
-        height: (object.shape === "Circle" ? object.w : object.h) ,
+        width: object.w,
+        height: (object.shape === "Circle" ? object.w : object.h),
         padding: "10px",
         outline: editMode ? "2px solid lightblue" : "none",
-        transform: `rotate(${object?.angle}deg)`
+        transform: `rotate(${object?.angle}deg)`,
+        transition: 'background .2s ease-out'
     }
+    const overlayStyle = {
+        position: "absolute",
+        display: "flex",
+        alignItems: "center",
+        left: -30,
+        top: -30,
+        width: object.w + 60,
+        height: (object.shape === "Circle" ? object.w : object.h) + 60,
+        padding: "10px",
 
+    }
 
 
     useEffect(() => {
@@ -53,6 +67,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
                 setEditMode(false)
             }
         }
+
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
@@ -60,12 +75,9 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
     }, [container])
 
 
-
-
-
     function handleMouseDown(e) {
 
-        if (e.target !== child.current && !child.current.contains(e.target)) {
+        if (e.target !== child.current && !child.current.contains(e.target) && e.button === 0) {
             setStart({x: e.clientX, y: e.clientY})
             setDown(true)
         }
@@ -74,7 +86,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
     }
 
     function handleMouseMove(e) {
-        if(object.angle%360!==0&& !(direction==="rotate"|| direction===""))return;
+        if (object.angle % 360 !== 0 && !(direction === "rotate" || direction === "")) return;
         if (!down || isUsable !== "Selection") return
 
         if (direction !== "") {
@@ -89,7 +101,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
                             return {
                                 ...object,
                                 y: e.clientY,
-                                h: 0
+                                h: 2
                             }
                         }
                         return {
@@ -103,7 +115,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
                             return {
                                 ...object,
                                 y: object.h + object.y,
-                                h: 0
+                                h: 2
                             }
                         }
                         return {
@@ -117,7 +129,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
                             setToggle(!toggle)
                             return {
                                 ...object,
-                                w: 1,
+                                w: 2,
                                 x: e.clientX,
                             }
                         }
@@ -132,7 +144,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
                             setToggle(!toggle)
                             return {
                                 ...object,
-                                w: 0,
+                                w: 2,
                                 x: e.clientX,
                             }
 
@@ -228,14 +240,14 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
             return {
                 ...el,
                 y: el.h + el.y,
-                h: 0
+                h: 2
             }
         } else {
             setDirection("lt")
             setToggle(!toggle)
             return {
                 ...el,
-                w: 0,
+                w: 2,
                 x: e.clientX,
             }
         }
@@ -248,14 +260,14 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
             return {
                 ...el,
                 y: el.h + el.y,
-                h: 0
+                h: 2
             }
         } else {
             setDirection("rt")
             setToggle(!toggle)
             return {
                 ...el,
-                w: 1,
+                w: 2,
                 x: e.clientX,
             }
 
@@ -269,14 +281,14 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
             return {
                 ...el,
                 y: e.clientY,
-                h: 0
+                h: 2
             }
         } else {
             setDirection("bl")
             setToggle(!toggle)
             return {
                 ...el,
-                w: 0,
+                w: 2,
                 x: e.clientX,
             }
 
@@ -290,7 +302,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
             return {
                 ...el,
                 y: e.clientY + 10,
-                h: 0
+                h: 2
             }
         } else {
             setDirection("br")
@@ -325,6 +337,39 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
             setDirection(str)
     }
 
+    function addCurve(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+
+        const style = getComputedStyle(e.target)
+        const rect = e.target.getBoundingClientRect()
+        let x = rect.x + rect.width / 2
+        let y = rect.y + rect.height / 2
+
+
+        if (style.top === "-30px")
+            y += 35
+        if (style.bottom === "-30px")
+            y -= 35
+        if (style.right === "-30px")
+            x -= 35
+        if (style.left === "-30px")
+            x += 35
+
+
+        setEditMode(false)
+        level?.setOption("Curve")
+        level?.setStart({x, y})
+        if (editorObject?.stroke) {
+            level?.setShapeId("d" + editorObject.id)
+        } else if (editorObject?.shape) {
+            level?.setShapeId(editorObject.id)
+        } else {
+            level?.setShapeId("t" + editorObject.id)
+
+        }
+
+
+    }
+
 
     return {
         handleClearDir,
@@ -332,18 +377,15 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
         handleMouseDown,
         handleMouseMove,
         handleMouseUp,
+        addCurve,
         toggle,
         object,
         center,
         editMode,
         down,
         TextStyle,
+        overlayStyle
     }
-
-
-
-
-
 
 
 }

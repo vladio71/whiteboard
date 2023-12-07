@@ -5,12 +5,13 @@ import {getId} from "./shapesSlice";
 export const curveSlice = createSlice({
     name: 'curve',
     initialState: {
-        curves: []
+        curves: [],
+        status: false
     },
     reducers: {
         addCurve: (state, action) => {
             const id = state.curves.length > 0 ? Math.max(...state.curves.map(el => el.id)) + 1 : 1
-            state.curves.push({...action.payload, id: id, style:{}})
+            state.curves.push({...action.payload, id: id, style: {}})
 
         },
         removeCurve: (state, action) => {
@@ -36,9 +37,12 @@ export const curveSlice = createSlice({
         updateCurves: (state, action) => {
             state.curves = [...action.payload]
         },
+        setEditStatus: (state, action) => {
+            state.status = action.payload
+        },
         addStyle: (state, action) => {
-            const indx = getId(state.curves,action.payload.id)
-            state.curves[indx].style= {
+            const indx = getId(state.curves, action.payload.id)
+            state.curves[indx].style = {
                 ...state.curves[indx].style,
                 ...action.payload.style
             }
@@ -49,7 +53,7 @@ export const curveSlice = createSlice({
 })
 
 
-export const {addCurve, removeCurve, updateCurve, addStyle, updateBorders,updateCurves} = curveSlice.actions
+export const {addCurve, removeCurve, updateCurve, addStyle, updateBorders, updateCurves, setEditStatus} = curveSlice.actions
 
 export function maybeSelectSth(state, id) {
 

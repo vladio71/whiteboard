@@ -1,8 +1,7 @@
 import {useCallback, useEffect, useRef} from "react";
 import {useCanvas} from "./useCanvas";
-import {setPath} from "../../../redux/shapesSlice";
 import {useAppDispatch} from "../../../redux/hooks";
-import {configureContext, useGetItemStyle} from "./Rectangle";
+import {configureContext, setShapeInfo, useGetItemStyle} from "./Rectangle";
 
 
 const Parallelogram = ({item}) => {
@@ -17,40 +16,33 @@ const Parallelogram = ({item}) => {
         const p = new Path2D()
 
 
-        configureContext(ctx, item, ()=>{
-            drawParallelogram(ctx,item)
+        configureContext(ctx, item, () => {
+            drawParallelogram(ctx, item)
 
         })
 
-
-
         ctx.beginPath();
-        drawParallelogram(ctx,item)
+        drawParallelogram(ctx, item)
         ctx.stroke()
 
         drawParallelogram(out, {
-            x: item.x-15,
-            y: item.y-15,
-            w:item.w+30,
-            h:item.h+30
+            x: item.x - 15,
+            y: item.y - 15,
+            w: item.w + 30,
+            h: item.h + 30
         })
         drawParallelogram(p, item)
         drawParallelogram(inside, {
-            x: item.x+15,
-            y: item.y+15,
-            w:item.w-30,
-            h:item.h-30
+            x: item.x + 15,
+            y: item.y + 15,
+            w: item.w - 30,
+            h: item.h - 30
         })
-        dispatch(setPath({
-            id: item.id,
-            o: out,
-            i: inside,
-            p: p,
-            center: {x: item.x + item.w / 2, y: item.y + item.h / 2}
-        }))
+        setShapeInfo(dispatch, item, out, p , inside)
 
 
-    }).bind(null, object), [object])
+
+    }).bind(null, object), [object.center.x, object.center.y, object.angle, object.style, object.down])
 
     function drawParallelogram(context, item) {
         context.moveTo(item.x + item.w / 5, item.y);
@@ -58,7 +50,8 @@ const Parallelogram = ({item}) => {
         context.lineTo(item.x + item.w / 5 * 4, item.y + item.h);
         context.lineTo(item.x + item.w, item.y);
         context.lineTo(item.x + item.w / 5, item.y);
-        context.lineTo(item.x, item.y + item.h);
+        if (!item.style?.line)
+            context.lineTo(item.x, item.y + item.h);
 
     }
 

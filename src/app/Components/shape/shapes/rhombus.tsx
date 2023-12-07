@@ -2,7 +2,7 @@ import {useCallback, useEffect, useRef} from "react";
 import {useCanvas} from "./useCanvas";
 import {useAppDispatch} from "../../../redux/hooks";
 import {setPath} from "../../../redux/shapesSlice";
-import {configureContext, useGetItemStyle} from "./Rectangle";
+import {configureContext, setShapeInfo, useGetItemStyle} from "./Rectangle";
 
 
 const Rhombus = ({item}) => {
@@ -40,20 +40,14 @@ const Rhombus = ({item}) => {
             w:item.w-50,
             h:item.h-50,
         })
-        dispatch(setPath({
-            id: item.id,
-            o: out,
-            i: inside,
-            p: p,
-            center: {x: item.x + item.w / 2, y: item.y + item.h / 2}
-        }))
+
+        setShapeInfo(dispatch, item, out, p , inside)
 
 
 
 
 
-
-    }).bind(null, object) , [object])
+    }).bind(null, object) , [object.center.x, object.center.y, object.angle, object.style,object.down])
 
     function drawRhombus(context, item) {
         context.moveTo(item.x+item.w/2, item.y)
@@ -61,7 +55,8 @@ const Rhombus = ({item}) => {
         context.lineTo(item.x +item.w/2, item.h + item.y);
         context.lineTo(item.w + item.x, item.y + item.h/2);
         context.lineTo(item.x+item.w/2, item.y)
-        context.lineTo(item.x, item.y+item.h/2);
+        if (!item.style?.line)
+            context.lineTo(item.x, item.y+item.h/2);
 
     }
 

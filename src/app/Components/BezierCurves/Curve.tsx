@@ -3,19 +3,20 @@ import {useCanvas} from "../shape/shapes/useCanvas";
 import css from './curves.module.css'
 import {useResizeLogic} from "../shape/useResizeLogic";
 import {useAppDispatch, useAppSelector} from "../../redux/hooks";
-import {updateBorders} from "../../redux/curvesSlice";
+import {removeCurve, updateBorders, setEditStatus} from "../../redux/curvesSlice";
 import ControlPoint from "./ControlPoint";
 import {useCurve} from "./useCurve";
 import CurvePopUp from "./CurvePopUp/CurvePopUp";
 import {selectStyles} from "../../redux/shapesSlice";
+import RemoveObject from "../Layout/utils/RemoveObject";
 
-const Curve = ({curve, isUsable}) => {
-
+const Curve = ({curve, isUsable, handleTop, handleBottom}) => {
 
 
     const [sample, setSample] = useState(curve)
     const [borders, setBorders] = useState({maxX: 0, maxY: 0, minX: 0, minY: 0})
     const container = useRef()
+    const dispatch = useAppDispatch()
     const style = useAppSelector(state => selectStyles(state, curve.id, "curves"))
 
 
@@ -34,8 +35,8 @@ const Curve = ({curve, isUsable}) => {
         left: -10,
         top: -10,
         display: 'block',
-        width: `${borders.maxX - borders.minX+20}px`,
-        height: `${borders.maxY - borders.minY+20}px`,
+        width: `${borders.maxX - borders.minX + 20}px`,
+        height: `${borders.maxY - borders.minY + 20}px`,
         position: "absolute",
         border: "1px solid blue",
     }
@@ -119,11 +120,28 @@ const Curve = ({curve, isUsable}) => {
         handleDown,
         editMode,
         toggle,
-        down
-    } = useCurve(curve, ref, sample, setSample, draw, drawArrow, container, getBorders, isUsable)
+        down,
+        isAttached,
+        isAttachedBack
+    } = useCurve(curve, ref, sample, setSample, draw, drawArrow, container, getBorders, isUsable,
+            handleTop,
+            handleBottom
+        )
+
+    // useEffect(() => {
+    //     if (down) {
+    //         handleBottom()
+    //         dispatch(setEditStatus(true))
+    //     } else {
+    //         handleTop()
+    //         dispatch(setEditStatus(false))
+    //
+    //     }
+    // }, [down])
 
     useResizeLogic(() => {
     }, handleUp, handleMove, down, toggle)
+
 
     useEffect(() => {
         if (plist.length > 0) {
@@ -132,44 +150,45 @@ const Curve = ({curve, isUsable}) => {
     }, [plist])
 
 
-
-
-
     return (
         <>
-            <div ref={container} tabIndex={1} style={styleContainer}
-                 className={css.container}
-                 onMouseDown={handleMouseDown}
+            <RemoveObject removeFunc={removeCurve} id={curve.id}>
+                <div ref={container} tabIndex={1} style={styleContainer}
+                     className={css.container}
+                     onMouseDown={handleMouseDown}
 
-            >
-                {(editMode && !down) &&
-                <CurvePopUp id={curve.id}/>
+                >
+
+                    {(editMode && !down) &&
+                    <CurvePopUp id={curve.id}/>
+                    }
+
+
+                    {curve?.selected &&
+                    <div style={selectedStyle}/>
+                    }
+
+                </div>
+
+
+                {editMode &&
+                <>
+                    {plist.map((p, i) => {
+                        return <ControlPoint key={i} handleMouseDown={() => handleDown(i, p)} point={p}/>
+                    })}
+
+                    {additionalPoints.map((p, i) => {
+                        return <ControlPoint
+                            key={'a' + i}
+                            additional={true}
+                            handleMouseDown={() => handleDown('a' + i)}
+                            point={p}/>
+                    })}
+
+                </>
                 }
-
-
-                {curve?.selected &&
-                <div style={selectedStyle}/>
-                }
-            </div>
-
-
-            {editMode &&
-            <>
-                {plist.map((p, i) => {
-                    return <ControlPoint key={i} handleMouseDown={() => handleDown(i, p)} point={p}/>
-                })}
-                {additionalPoints.map((p, i) => {
-                    return <ControlPoint
-                        key={'a' + i}
-                        additional={true}
-                        handleMouseDown={() => handleDown('a' + i)}
-                        point={p}/>
-                })}
-
-            </>
-            }
-
-            <canvas ref={ref}/>
+                <canvas ref={ref}/>
+            </RemoveObject>
         </>
     )
 }

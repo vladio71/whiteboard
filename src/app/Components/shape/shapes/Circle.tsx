@@ -2,7 +2,7 @@ import {useCallback, useEffect, useRef} from "react";
 import {useCanvas} from "./useCanvas";
 import {setPath} from "../../../redux/shapesSlice";
 import {useAppDispatch} from "../../../redux/hooks";
-import {configureContext, useGetItemStyle} from "./Rectangle";
+import {configureContext, setShapeInfo, useGetItemStyle} from "./Rectangle";
 
 
 const Circle = ({item}) => {
@@ -26,20 +26,16 @@ const Circle = ({item}) => {
         ctx.arc(item.x + item.w / 2, item.y + item.w / 2, Math.abs(item.w / 2), 0, 2 * Math.PI);
         ctx.stroke()
 
-        out.arc(item.x + item.w / 2, item.y + item.w / 2, Math.abs(item.w / 2) + 30, 0, 2 * Math.PI);
+        out.arc(item.x + item.w / 2, item.y + item.w / 2, Math.abs((item.w / 2)+30), 0, 2 * Math.PI);
         p.arc(item.x + item.w / 2, item.y + item.w / 2, Math.abs(item.w / 2), 0, 2 * Math.PI);
-        inside.arc(item.x + item.w / 2, item.y + item.w / 2, Math.abs(item.w / 2) - 30, 0, 2 * Math.PI);
-
-        dispatch(setPath({
-            id: item.id,
-            o: out,
-            i: inside,
-            p: p,
-            center: {x: item.x + item.w / 2, y: item.y + item.w / 2}
-        }))
+        inside.arc(item.x + item.w / 2, item.y + item.w / 2, Math.abs((item.w / 2)-30), 0, 2 * Math.PI);
 
 
-    }).bind(null, object), [object])
+        setShapeInfo(dispatch, item, out, p , inside)
+
+
+
+    }).bind(null, object), [object.center.x, object.center.y, object.angle, object.style,object.down])
     const ref = useCanvas(draw)
 
 

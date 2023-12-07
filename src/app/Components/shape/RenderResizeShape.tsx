@@ -2,9 +2,10 @@ import ContainerResizeComponent from "../DndResizeRotateContainer/ContainerResiz
 import {renderSwitch} from "./renderShape";
 import MyEditor from "../TextObject/MyEditor";
 import {useAppDispatch} from "../../redux/hooks";
-import {updateShape} from "../../redux/shapesSlice"
+import {removeShape, updateShape} from "../../redux/shapesSlice"
 import EditingPopUp from "../EditingPopUp/EditingPopUp";
 import * as React from "react";
+import RemoveObject from "../Layout/utils/RemoveObject";
 
 
 const RenderResizeShape = ({item}) => {
@@ -18,14 +19,17 @@ const RenderResizeShape = ({item}) => {
 
 
     return (<>
-            <ContainerResizeComponent
-                id={item.id}
-                editorObject={item}
-                renderProp={(object) => <Object obj={object}/>}
-                saveChanges={saveChanges}>
-                <MyEditor editable={true} id={item.id}/>
-            </ContainerResizeComponent>
+            <RemoveObject key={item.id} removeFunc={removeShape} id={item.id}>
+                <ContainerResizeComponent
+                    id={item.id}
+                    editorObject={item}
+                    renderProp={(object) => <Object obj={object}/>}
+                    saveChanges={saveChanges}
+                >
+                    <MyEditor editable={true} id={item.id}/>
+                </ContainerResizeComponent>
 
+            </RemoveObject>
 
         </>
     )
@@ -41,7 +45,7 @@ const Object = ({obj}) => {
         display: "flex",
         alignItems: "center",
         left: obj.x - 10,
-        top: obj.y - 10,
+        top: obj.y - 40,
         width: obj.w,
         height: 60,
         padding: "10px",

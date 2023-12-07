@@ -13,10 +13,9 @@ function MyEditor({id, style, focus, editable, category = 'shape'}) {
     const object = useContext(ObjectContext);
 
     const element = useAppSelector(state => selectTextEditor(state, id, category))
-    const state = EditorState.createWithContent(convertFromRaw(element.editor))
-    const shapeStyle = element.style
+    const state = element ? EditorState.createWithContent(convertFromRaw(element.editor)) : EditorState.createEmpty()
+    const shapeStyle =  element?.style
     const [edState, setEdState] = useState(state)
-
 
 
     const styles = {
@@ -24,15 +23,15 @@ function MyEditor({id, style, focus, editable, category = 'shape'}) {
             fontFamily: shapeStyle?.fontFamily ? shapeStyle?.fontFamily : '\'Helvetica\', sans-serif',
             overflow: 'auto',
             height: '40%',
-            maxHeight: object?.h ?  object.h : '200px',
+            maxHeight: object?.h ? object.h : '200px',
             width: object?.w ? object.w : category === "shape" ? '60%' : '100%',
-         },
+        },
         editor: {
             cursor: 'text',
             background: 'transparent',
             padding: 10,
             fontSize: shapeStyle?.fontSize ? shapeStyle.fontSize + 'px' : '14px',
-            userSelect: object?.down? 'none': 'auto',
+            userSelect: object?.down ? 'none' : 'auto',
 
 
         },
@@ -48,7 +47,8 @@ function MyEditor({id, style, focus, editable, category = 'shape'}) {
     }, [focus])
 
 
-    function updateState(editorState) {setEdState(editorState)
+    function updateState(editorState) {
+        setEdState(editorState)
         if (category === 'shape') {
             dispatch(updateEditor({
                 id: id,

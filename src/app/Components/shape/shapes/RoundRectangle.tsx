@@ -2,7 +2,7 @@ import {useCallback, useEffect, useRef} from "react";
 import {useCanvas} from "./useCanvas";
 import {useAppDispatch} from "../../../redux/hooks";
 import {setPath} from "../../../redux/shapesSlice";
-import {configureContext, useGetItemStyle} from "./Rectangle";
+import {configureContext, setShapeInfo, useGetItemStyle} from "./Rectangle";
 
 
 const RoundRectangle = ({item}) => {
@@ -33,17 +33,11 @@ const RoundRectangle = ({item}) => {
         inside.roundRect(item.x+15, item.y+15, item.w-30, item.h-30, 20)
 
 
-
-        dispatch(setPath({
-            id: item.id,
-            o: out,
-            i: inside,
-            p: p,
-            center: {x: item.x + item.w / 2, y: item.y + item.h / 2}
-        }))
+        setShapeInfo(dispatch, item, out, p , inside)
 
 
-    }).bind(null, object) , [object])
+
+    }).bind(null, object) , [object.center.x, object.center.y, object.angle, object.style,object.down])
 
 
 

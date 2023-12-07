@@ -14,6 +14,7 @@ export const useHome = () => {
     const [option, setOption] = useState('')
 
 
+
     const shapes = useAppSelector(state => state.present.shape.shapes)
 
 
@@ -32,6 +33,7 @@ export const useHome = () => {
             y: e.clientY as number,
             w: 160,
             h: 80,
+            style:{},
             editor: convertToRaw(EditorState.createEmpty().getCurrentContent())
         }))
         setShape('')

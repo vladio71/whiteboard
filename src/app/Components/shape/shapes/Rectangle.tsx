@@ -14,6 +14,7 @@ const Rectangle = ({item}) => {
         const inside = new Path2D()
         const p = new Path2D()
 
+
         configureContext(ctx, item, () => {
             ctx.rect(item.x, item.y, item.w, item.h)
         })
@@ -25,16 +26,11 @@ const Rectangle = ({item}) => {
         out.rect(item.x - 15, item.y - 15, item.w + 30, item.h + 30)
         p.rect(item.x, item.y, item.w, item.h)
         inside.rect(item.x + 15, item.y + 15, item.w - 30, item.h - 30)
-         dispatch(setPath({
-            id: item.id,
-            o: out,
-            i: inside,
-            p: p,
-            center: {x: item.x + item.w / 2, y: item.y + item.h / 2}
-        }))
+
+        setShapeInfo(dispatch, item, out, p, inside)
 
 
-    }).bind(null, object), [object.center.x,object.center.y, object.angle, object.style])
+    }).bind(null, object), [object.center.x, object.center.y, object.angle, object.style, object.down])
 
     const ref = useCanvas(draw)
 
@@ -49,6 +45,31 @@ const Rectangle = ({item}) => {
 export function useGetItemStyle(item) {
     const style = useAppSelector(state => selectShape(state, item.id))?.style
     return {...item, style}
+}
+
+export function setShapeInfo(dispatch, item, out, p, inside) {
+
+    dispatch(setPath({
+        id: item.id,
+        shape: item.shape,
+        o: out,
+        i: inside,
+        p: p,
+        center: {x: item.x + item.w / 2, y: item.y + (item.shape === "Circle" ? item.w : item.h) / 2},
+        w: item.w,
+        h: item.h,
+        angle: item.angle
+    }))
+}
+
+export function setRectPath(dispatch, item, id) {
+    const out = new Path2D()
+    const inside = new Path2D()
+    const p = new Path2D()
+    out.rect(item.x - 25, item.y - 25, item.w + 38, item.h + 38)
+    p.rect(item.x -10, item.y-10, item.w +28, item.h+28)
+    inside.rect(item.x, item.y, item.w, item.h)
+    setShapeInfo(dispatch, {...item, id: id}, out, p, inside)
 }
 
 export function configureContext(ctx, item, func) {
@@ -78,7 +99,7 @@ export function configureContext(ctx, item, func) {
         if (item.style.line < 2) {
             ctx.setLineDash([dashedStepLength, 15]);
         } else {
-            ctx.setLineDash([dashedStepLength/5, 3]);
+            ctx.setLineDash([dashedStepLength / 5, 3]);
         }
     }
 }

@@ -1,13 +1,16 @@
-import React, {useRef, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
 import css from './curves.module.css'
 import {useResizeLogic} from "../shape/useResizeLogic";
 import {useAppDispatch, useAppSelector} from "../../redux/hooks";
-import {addCurve,removeCurve} from "../../redux/curvesSlice"
+import {addCurve, removeCurve} from "../../redux/curvesSlice"
 import Curve from "./Curve";
+import {LevelContext} from "../../page";
 
 const CurvesCanvas = ({add, setShape, isUsable}) => {
 
     const dispatch = useAppDispatch()
+
+    const level = useContext(LevelContext)
 
     const [down, setDown] = useState(false)
     const [end, setEnd] = useState(false)
@@ -15,9 +18,23 @@ const CurvesCanvas = ({add, setShape, isUsable}) => {
     const [start, setStart] = useState({x: 0, y: 0})
     const refAdding = useRef(null)
     const curves = useAppSelector(state => state.present.curve.curves)
+    const curveRef = useRef({})
 
 
-    useResizeLogic(handleDown, handleUp, handleMove, down, end === add)
+    useEffect(() => {
+        setStart(level?.start)
+        handleDown(null)
+    }, [level?.start])
+
+    useEffect(() => {
+
+        window.addEventListener('mousedown', handleDown)
+        window.addEventListener('mousemove', handleMove)
+        return () => {
+            window.removeEventListener('mousemove', handleMove)
+            window.removeEventListener('mousedown', handleDown)
+        }
+    }, [down, end === add])
 
 
     function handleDown(e) {
@@ -28,25 +45,32 @@ const CurvesCanvas = ({add, setShape, isUsable}) => {
         }
         setDown(true)
         setEnd(false)
-        let start = {x: e.clientX, y: e.clientY};
-        setStart(start)
+        if (e!== null)
+            setStart({x: e.clientX, y: e.clientY})
 
 
-    }
-
-
-    function handleUp() {
-        if (end && add) {
-            dispatch(addCurve(curvePath))
+        setTimeout(() => {
+            dispatch(addCurve({
+                ...curveRef.current,
+                shapeIndex: e===null?level?.shapeId:-1
+            }))
             setShape('Selection')
-            const canvas = refAdding.current
-            canvas.width = window.innerWidth
-            canvas.height = window.innerHeight
             setDown(false)
-        }
+            setEnd(!end)
+            level?.setStart({x: 0, y: 0})
+            setTimeout(() => {
+                const canvas = refAdding.current
+                canvas.width = window.innerWidth
+                canvas.height = window.innerHeight
+            }, 30)
+        }, 400)
+
+
     }
+
 
     function handleMove(e) {
+
         if (!down || !add) return
         const canvas = refAdding.current
         const ctx = canvas.getContext("2d")
@@ -62,7 +86,6 @@ const CurvesCanvas = ({add, setShape, isUsable}) => {
         curve.moveTo(start.x, start.y);
         curve.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, end.x, end.y);
         ctx.stroke(curve);
-
 
         const tStart = getPointOnCurve(start, cp1, cp2, end, 0.95)
         const dx = end.x - tStart.x;
@@ -84,12 +107,12 @@ const CurvesCanvas = ({add, setShape, isUsable}) => {
         ctx.fill();
         ctx.restore();
 
-        setCurvePath({
+        curveRef.current = {
             id: 0,
             curve: curve,
             angle: endingAngle,
-            points: [start, end]
-        })
+            points: [start, end],
+        }
 
 
     }
@@ -98,18 +121,17 @@ const CurvesCanvas = ({add, setShape, isUsable}) => {
     return (
         <>
 
+            {/*{curves.map(curve => {*/}
+            {/*    return <div key={curve.id} onKeyDown={(e) => {*/}
 
-            {curves.map(curve => {
-                return <div key={curve.id} onKeyDown={(e) => {
+            {/*        if (e.key === "Backspace" || e.key === "Delete") {*/}
+            {/*            dispatch(removeCurve(curve.id))*/}
+            {/*        }*/}
+            {/*    }}>*/}
 
-                    if (e.key === "Backspace" || e.key === "Delete") {
-                        dispatch(removeCurve(curve.id))
-                    }
-                }}>
-
-                    <Curve curve={curve} isUsable={isUsable}/>
-                </div>
-            })}
+            {/*        <Curve curve={curve} isUsable={isUsable}/>*/}
+            {/*    </div>*/}
+            {/*})}*/}
 
 
             <canvas ref={refAdding}></canvas>

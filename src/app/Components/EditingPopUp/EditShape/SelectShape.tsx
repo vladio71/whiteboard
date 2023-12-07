@@ -16,7 +16,7 @@ const SelectShape = ({id}) => {
     const dispatch = useAppDispatch()
     const shapeState = useAppSelector((state) => selectShape(state, id))
     const [open, setOpen] = useState(false)
-    const [shape, setShape] = useState(shapeState.shape)
+    const [shape, setShape] = useState(shapeState?.shape)
     const dict = {
         "Rectangle": <MdOutlineRectangle/>,
         "Rhombus": <CgShapeRhombus/>,

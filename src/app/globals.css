@@ -16,7 +16,7 @@
 
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
- }
+}
 
 
 body {
@@ -66,18 +66,20 @@ canvas {
 
 .back {
     position: relative;
-    /*min-width: 1200px;*/
-    /*min-height: 1800px;*/
+    width: 100vw;
+    height: 100vh;
 
 }
 
 .background {
     position: absolute;
-    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    /*inset: 0;*/
     opacity: .1;
     background-image: url("/square.jpg");
-    box-shadow:  inset 0 0 0 2000px rgba(0, 0, 0, 0.5);
-    z-index: -10;
+    box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.5);
+    /*z-index: -10;*/
 
 }
 
@@ -96,6 +98,21 @@ canvas {
     left: -5px;
     cursor: nwse-resize;
 
+}
+
+input{
+    width: 100%;
+    padding: .3rem .6rem;
+
+}
+button {
+    background: #3f42ff;
+    color: white;
+    font-size: 1rem;
+    padding: .6rem .8rem;
+    border-radius: .3rem;
+    outline: none;
+    border: none;
 }
 
 .rt {
@@ -129,7 +146,7 @@ canvas {
 
 }
 
-.rotate{
+.rotate {
     position: absolute;
     width: 10px;
     height: 10px;
@@ -191,5 +208,4 @@ canvas {
     overflow: hidden;
     /*max-height: 75%;*/
     /*padding: 1rem;*/
-
 }

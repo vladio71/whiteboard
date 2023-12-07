@@ -1,5 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit'
-import {getId} from "./shapesSlice";
+import {getId, addLink} from "./shapesSlice";
+import {removeText} from "./textSlice";
 
 
 export const drawingSlice = createSlice({
@@ -48,18 +49,35 @@ export const drawingSlice = createSlice({
         addStyle: (state, action) => {
 
             if (action.payload.style?.color) {
-                const idx =  action.payload.id - 1
+                const idx = action.payload.id - 1
                 state.style.selectedId = idx
                 state.style.selected[idx].color = action.payload.style?.color
-                if(action.payload.style?.thickness)
-                state.style.selected[idx].thickness = action.payload.style.thickness
+                if (action.payload.style?.thickness)
+                    state.style.selected[idx].thickness = action.payload.style.thickness
 
             }
 
 
         }
 
-    }
+    },
+    extraReducers: (builder => {
+        builder
+            .addCase(addLink, (state, action) => {
+                if(action.payload.id[0] === "d") {
+                    const id = getId(state.drawings, action.payload.id.slice(1) * 1)
+                    if (Number.isInteger(id)) {
+                        return {
+                            ...state,
+                            drawings: state.drawings.map((el, ID) => {
+                                return ID === id ? {...el, link: action.payload.link} : el
+                            })
+                        }
+                    }
+                }
+            })
+
+    })
 
 
 })
@@ -68,7 +86,7 @@ export const drawingSlice = createSlice({
 export const {addDrawing, deleteDrawing, updateDrawings, updateDrawing, addStyle, setBrush} = drawingSlice.actions
 
 export function selectDrawingStyle(state) {
-      return state.present.drawing.style.selected[state.present.drawing.style.selectedId]
+    return state.present.drawing.style.selected[state.present.drawing.style.selectedId]
 }
 
 export default drawingSlice.reducer

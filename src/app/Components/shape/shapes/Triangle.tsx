@@ -1,8 +1,8 @@
-import {useCallback, useEffect, useRef} from "react";
+import {useCallback} from "react";
 import {useCanvas} from "./useCanvas";
 import {setPath} from "../../../redux/shapesSlice";
 import {useAppDispatch} from "../../../redux/hooks";
-import {configureContext, useGetItemStyle} from "./Rectangle";
+import {configureContext, setShapeInfo, useGetItemStyle} from "./Rectangle";
 
 
 const Triangle = ({item}) => {
@@ -41,19 +41,10 @@ const Triangle = ({item}) => {
             h:item.h-50
         })
 
-         dispatch(setPath({
-            id: item.id,
-            o: out,
-            i: inside,
-            p: p,
-            center: {x: item.x + item.w / 2, y: item.y + item.h / 2}
-        }))
+         setShapeInfo(dispatch, item, out, p , inside)
 
 
-
-
-
-    }).bind(null, object), [object])
+     }).bind(null, object), [object.center.x, object.center.y, object.angle, object.style,object.down])
 
 
     function drawTriangle(context, item) {
@@ -61,7 +52,8 @@ const Triangle = ({item}) => {
         context.lineTo(item.x, item.y + item.h);
         context.lineTo(item.x + item.w, item.y + item.h);
         context.lineTo(item.x + item.w / 2, item.y);
-        context.lineTo(item.x, item.y + item.h);
+        if (!item.style?.line)
+            context.lineTo(item.x, item.y + item.h);
 
     }
 

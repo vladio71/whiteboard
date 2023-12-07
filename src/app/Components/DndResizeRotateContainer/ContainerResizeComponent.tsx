@@ -1,13 +1,11 @@
-import {createContext, useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {useAppDispatch, useAppSelector} from "../../redux/hooks";
-import MyEditor from "../TextObject/MyEditor";
+import {createContext, Dispatch, useRef} from "react";
+import css from './ContainerResize.module.css'
 import * as React from "react";
-import {CSS} from "@dnd-kit/utilities";
-import {updateTextObject} from "../../redux/textSlice";
 import {useResizeLogic} from "../shape/useResizeLogic";
 import {GrRotateRight} from "react-icons/gr";
 import Selected from "../Selection/Selected";
 import {useContainerResize} from "./useContainerResize";
+import {useAppSelector} from "../../redux/hooks";
 
 export const ObjectContext = createContext<Editable | null>(null);
 
@@ -18,21 +16,24 @@ interface Editable {
     h: number,
     category?: string,
     editMode?: boolean,
-    down?: boolean
-
+    down?: boolean,
+    link?: URL | string
 }
 
 const ContainerResizeComponent = ({editorObject, renderProp, saveChanges, children, isUsable = "Selection"}: {
     isUsable: string,
     editorObject: Editable,
-    renderProp?: (obj) => React.ReactNode,
-    children?: React.ReactNode,
     saveChanges: Function
+    renderProp?: (obj) => React.ReactNode,
+    setOption?: Dispatch<string>,
+    children?: React.ReactNode,
 }) => {
 
 
     const container = useRef()
     const child = useRef()
+    const overlay = useRef()
+    const editCurveStatus = useAppSelector(state => state.present.curve.status)
 
     const {
         handleClearDir,
@@ -40,17 +41,32 @@ const ContainerResizeComponent = ({editorObject, renderProp, saveChanges, childr
         handleMouseDown,
         handleMouseMove,
         handleMouseUp,
+        addCurve,
         toggle,
         object,
         center,
         editMode,
         down,
-        TextStyle
+        TextStyle,
+        overlayStyle
     } = useContainerResize(editorObject, isUsable, child, container, saveChanges)
 
     useResizeLogic(() => {
     }, handleMouseUp, handleMouseMove, down, toggle)
 
+    function handleEnterCurve(e) {
+        overlay.current.style.background = "rgba(128, 128, 128, 0.1)"
+
+    }
+
+    function handleLeaveCurve(e: MouseEvent) {
+        if (overlay.current.contains(e.relatedTarget)) return
+        overlay.current.style.background = "transparent"
+    }
+
+    const linkStyle = {
+        backgroundImage: `url(https://s2.googleusercontent.com/s2/favicons?domain_url=${editorObject?.link?.href})`,
+    }
 
     return (
 
@@ -64,9 +80,26 @@ const ContainerResizeComponent = ({editorObject, renderProp, saveChanges, childr
             }}>
             <div ref={container}>
                 <div style={TextStyle}
+                     ref={overlay}
                      onMouseDown={handleMouseDown}>
+                    <div className={css.hoverContainer}
+                         onMouseOver={editCurveStatus ? handleEnterCurve : undefined}
+                         onMouseOut={handleLeaveCurve}
+                         style={overlayStyle}
+                    />
+                    {editorObject?.link &&
+                        <a href={editorObject.link.href} target={'_blank'}>
+                            <div className={css.link} style={linkStyle}/>
+                        </a>
+                    }
                     {editMode &&
                     <>
+                        <div onMouseDown={(e) => e.stopPropagation()}>
+                            <div className={`${css.curveControl} ${css.top}`} onClick={addCurve}/>
+                            <div className={`${css.curveControl} ${css.right}`} onClick={addCurve}/>
+                            <div className={`${css.curveControl} ${css.left}`} onClick={addCurve}/>
+                            <div className={`${css.curveControl} ${css.bottom}`} onClick={addCurve}/>
+                        </div>
                         <div className={'lt'}
                              onMouseOver={() => handleMouseOver("lt")}
                              onMouseLeave={handleClearDir}

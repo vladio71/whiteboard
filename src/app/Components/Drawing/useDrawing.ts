@@ -3,6 +3,7 @@ import {useAppDispatch, useAppSelector} from "../../redux/hooks";
 import {deleteDrawing} from "../../redux/drawingSlice";
 import {useState} from "react";
 import {checkRectIntersection} from "../Selection/Selection";
+import {setShapeInfo, setRectPath} from "../shape/shapes/Rectangle";
 
 
 export const useDrawing = (brush, canvasRef, ctx, down, setDown) => {
@@ -143,42 +144,47 @@ export const useDrawing = (brush, canvasRef, ctx, down, setDown) => {
 
     }
 
-    function getLineWidth(thickness) {
-        if (thickness === 0) return 2
 
-        return 2 + 10 * thickness
-    }
-    function draw(drawing, ctx) {
-
-        ctx.strokeStyle = drawing.color
-        ctx.lineCap = "round";
-        ctx.lineWidth = getLineWidth(drawing.thickness)
-
-
-        ctx.resetTransform()
-
-        const sclaeX = drawing.w / drawing.startW
-        const sclaeY = drawing.h / drawing.startH
-
-        const c = drawing.center
-        ctx.translate(c.x, c.y)
-        ctx.rotate(drawing.angle * Math.PI / 180);
-        ctx.translate(-c.x, -c.y)
-
-
-        ctx.translate(drawing.x - drawing.startX * sclaeX, drawing.y - drawing.startY * sclaeY)
-        ctx.transform(sclaeX, 0, 0, sclaeY, 0, 0)
-        ctx.stroke(drawing.stroke)
-
-
-        ctx.resetTransform()
-        ctx.beginPath()
-
-    }
 
     function getDistance(p1, p2) {
         return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2))
     }
 
+
+}
+
+function getLineWidth(thickness) {
+    if (thickness === 0) return 2
+
+    return 2 + 10 * thickness
+}
+export function draw(drawing, ctx, dispatch) {
+
+    ctx.strokeStyle = drawing.color
+    ctx.lineCap = "round";
+    ctx.lineWidth = getLineWidth(drawing.thickness)
+
+
+    ctx.resetTransform()
+
+    const sclaeX = drawing.w / drawing.startW
+    const sclaeY = drawing.h / drawing.startH
+
+    const c = drawing.center
+    ctx.translate(c.x, c.y)
+    ctx.rotate(drawing.angle * Math.PI / 180);
+    ctx.translate(-c.x, -c.y)
+
+
+    ctx.translate(drawing.x - drawing.startX * sclaeX, drawing.y - drawing.startY * sclaeY)
+    ctx.transform(sclaeX, 0, 0, sclaeY, 0, 0)
+    ctx.stroke(drawing.stroke)
+
+    setRectPath(dispatch, drawing, "d"+drawing.id)
+
+
+
+    ctx.resetTransform()
+    ctx.beginPath()
 
 }

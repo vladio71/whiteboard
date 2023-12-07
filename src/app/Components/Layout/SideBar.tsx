@@ -8,14 +8,18 @@ import {LuMousePointer2} from "react-icons/lu";
 import ChoseShapePopUp from "./SideBarPopUps/ChoseShapePopUp";
 import DrawingPopUp from "./SideBarPopUps/DrawingPopUp";
 import CaptionOnHover from "./utils/CaptionOnHover";
-import {updateDrawings} from "../../redux/drawingSlice";
+import {updateDrawings, addDrawing} from "../../redux/drawingSlice";
 import {updateCurves} from "../../redux/curvesSlice";
-import {updateShapes} from "../../redux/shapesSlice";
+import {addText} from "../../redux/textSlice";
+import {addCurve} from "../../redux/curvesSlice";
+import {updateShapes, saveObjectInfo, addShape} from "../../redux/shapesSlice";
 import {useAppDispatch, useAppSelector} from "../../redux/hooks";
 import {BiText} from "react-icons/bi";
 import {ActionCreators} from 'redux-undo';
 import {TfiBackLeft, TfiBackRight} from "react-icons/tfi";
 import {IoReturnDownBack, IoReturnUpForwardOutline} from "react-icons/io5";
+import {Point} from "../../page";
+import {moveCurve} from "../BezierCurves/useCurve";
 
 
 const SideBar = ({setShape, setOption, option}) => {
@@ -25,10 +29,12 @@ const SideBar = ({setShape, setOption, option}) => {
     const [open, setOpen] = useState('')
     const popUps = useRef(null)
     const [toggle, setToggle] = useState(false)
+    const [mousePosition, setMousePosition] = useState<Point>({x: 0, y: 0})
     const [caption, setCaption] = useState('')
     const drawings = useAppSelector(state => state.present.drawing.drawings)
     const curves = useAppSelector(state => state.present.curve.curves)
     const shapes = useAppSelector(state => state.present.shape.shapes)
+    const savedObject = useAppSelector(state => state.present.shape.savedObject.saved)
 
 
     useEffect(() => {
@@ -36,7 +42,22 @@ const SideBar = ({setShape, setOption, option}) => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown)
         }
-    }, [open, toggle, drawings, curves, shapes])
+    }, [open, toggle, drawings, curves, shapes, mousePosition])
+
+
+    useEffect(() => {
+        function saveMousePosition(e) {
+            setMousePosition({
+                x: e.clientX,
+                y: e.clientY
+            })
+        }
+
+        window.addEventListener('mousemove', saveMousePosition)
+        return () => {
+            window.removeEventListener('mousemove', saveMousePosition)
+        }
+    }, [])
 
     function handleEnter(name) {
         setCaption(name)
@@ -46,9 +67,26 @@ const SideBar = ({setShape, setOption, option}) => {
         setCaption('')
     }
 
+    function handleCurveCopy(object) {
+        const center = {
+            x: object.borders.x + object.borders.w / 2,
+            y: object.borders.y + object.borders.h / 2,
+        }
+        const d = {x: mousePosition.x - center.x, y: mousePosition.y - center.y}
+
+        const {
+            newCurve,
+            path
+        }=moveCurve(object, d)
+
+        dispatch(addCurve({
+            ...newCurve,
+            curve: path
+        }))
+
+    }
+
     function handleKeyDown(e) {
-
-
         if (e.key.toUpperCase() === 'Z' && e.ctrlKey && e.shiftKey) {
             dispatch(ActionCreators.redo())
         } else if (e.key.toUpperCase() === 'Z' && e.ctrlKey) {
@@ -56,13 +94,40 @@ const SideBar = ({setShape, setOption, option}) => {
 
         }
 
-
         if (e.key === "Backspace" || e.key === "Delete") {
             dispatch(updateDrawings(drawings.filter(el => !el.selected)))
             dispatch(updateCurves(curves.filter(el => !el.selected)))
             dispatch(updateShapes(shapes.filter(el => !el.selected)))
             setToggle(!toggle)
 
+        }
+
+        if (e.key.toUpperCase() === 'C' && e.ctrlKey) {
+            dispatch(saveObjectInfo())
+        }
+
+        if (e.key.toUpperCase() === 'V' && e.ctrlKey) {
+
+            const temp = savedObject.object
+            const object = {
+                ...temp,
+                x: mousePosition.x - temp.w / 2,
+                y: mousePosition.y - temp.h / 2,
+                copy: true
+            }
+
+            if (savedObject.type === 'shape') {
+                dispatch(addShape(object))
+            }
+            if (savedObject.type === 'text') {
+                dispatch(addText(object))
+            }
+            if (savedObject.type === 'drawing') {
+                dispatch(addDrawing(object))
+            }
+            if (savedObject.type === 'curve') {
+                handleCurveCopy(object)
+            }
         }
 
         if (e.key.toUpperCase() === 'A' && e.altKey) {
@@ -130,7 +195,7 @@ const SideBar = ({setShape, setOption, option}) => {
             }}
             onMouseUp={e => {
 
-                if(popUps.current.contains(e.target))return
+                if (popUps.current.contains(e.target)) return
                 e.stopPropagation();
             }}
             className={css.sideBar}
@@ -199,7 +264,7 @@ const SideBar = ({setShape, setOption, option}) => {
                 </div>
 
 
-                <div >
+                <div>
                     {open === 'Shape' &&
                     <ChoseShapePopUp setShape={setShape} setOpen={() => handleOpenPopUp('Shape')}/>
 

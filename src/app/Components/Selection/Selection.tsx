@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../redux/hooks";
 import {updateDrawings} from "../../redux/drawingSlice";
 import {updateCurves} from "../../redux/curvesSlice";
-import {updateShapes} from "../../redux/shapesSlice";
+import {updateShapes, setObjectInfo} from "../../redux/shapesSlice";
 import {updateTexts} from "../../redux/textSlice";
 import css from './selection.module.css'
 
@@ -59,22 +59,27 @@ const Selection = ({isUsed}) => {
             w: 5,
             h: 5
         }
+        function checkCollection(arr, name) {
+            if (arr.length > 0 && arr.some((el, id) => {
+                if(checkRectIntersection(selection, getRect(el?.borders||el))){
+                    dispatch(setObjectInfo({
+                        type: name,
+                        object : el
+                    }))
+                    return true
+                }
+                return false
 
-        if (shapes.length > 0 && shapes.some((shape, id) => {
-            return checkRectIntersection(selection, getRect(shape));
-        })
-        ) return
-        if (curves.length > 0 && curves.some(curve => {
-            return checkRectIntersection(selection, getRect(curve.borders))
-        })) return;
+            }))return true
+            return false
+        }
 
-        if (texts.length > 0 && texts.some(text => {
-            return checkRectIntersection(selection, getRect(text))
-        })) return;
 
-        if (drawings.length > 0 && drawings.some(drawing => {
-            return checkRectIntersection(selection, getRect(drawing))
-        })) return;
+
+        if(checkCollection(shapes, 'shape'))return
+        if(checkCollection(curves, 'curve'))return
+        if(checkCollection(texts, 'text'))return
+        if(checkCollection(drawings, 'drawing'))return
 
 
         setStart({x: e.clientX, y: e.clientY})
@@ -83,6 +88,8 @@ const Selection = ({isUsed}) => {
             position: 'absolute'
         })
     }
+
+
 
 
     function handleMove(e) {

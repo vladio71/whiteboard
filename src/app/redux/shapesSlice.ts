@@ -1,15 +1,25 @@
 import {createSlice} from '@reduxjs/toolkit'
 import type {PayloadAction} from '@reduxjs/toolkit'
 import {EditorState} from 'draft-js';
+import {deleteDrawing} from './drawingSlice';
+import {removeText} from './textSlice';
 
 export interface shapeSlice {
     shapes: [object],
     paths: [object]
+    savedObject: {
+        last: object | null,
+        saved: object | null
+    }
 }
 
 const initialState: shapeSlice = {
     shapes: [],
-    paths: []
+    paths: [],
+    savedObject: {
+        last: null,
+        saved: null
+    }
 }
 
 export const shapeSlice = createSlice({
@@ -19,7 +29,7 @@ export const shapeSlice = createSlice({
         addShape: (state, action) => {
             const id = state.shapes.length > 0 ? Math.max(...state.shapes.map(el => el.id)) + 1 : 1
 
-            state.shapes.push({...action.payload, id: id, style:{}})
+            state.shapes.push({...action.payload, id: id,})
         },
         changeShape: (state, action) => {
             const indx = getId(state.shapes, action.payload.id)
@@ -38,8 +48,8 @@ export const shapeSlice = createSlice({
                 return {...el, editor: state.shapes[id].editor}
             })
 
-            const ids = action.payload.map(el => el.id)
-            state.paths = state.paths.filter(el => ids.includes(el.id))
+            // const ids = action.payload.map(el => el.id)
+            // state.paths = state.paths.filter(el => ids.includes(el.id))
         },
         updateShape: (state, action) => {
 
@@ -65,25 +75,63 @@ export const shapeSlice = createSlice({
         setPath: (state, action) => {
             const pathId = getId(state.paths, action.payload.id)
             if (pathId !== -1) {
-                state.paths[pathId].p = action.payload.p
-                state.paths[pathId].o = action.payload.o
-                state.paths[pathId].i = action.payload.i
-                state.paths[pathId].center = action.payload.center
+                state.paths[pathId] = {...action.payload}
             } else {
                 state.paths.push(action.payload)
             }
         },
+        setObjectInfo: (state, action) => {
+            state.savedObject.last = action.payload
+        },
+        saveObjectInfo: (state) => {
+            state.savedObject.saved = state.savedObject.last
+        },
+        addLink: (state, action) => {
+            const id = getId(state.shapes, action.payload.id)
+            if (id>=0) {
+                state.shapes[id].link = action.payload.link
+            }
+        }
 
 
     },
+    extraReducers: (builder => {
+        builder
+            .addCase(deleteDrawing, (state, action) => {
+                return {
+                    ...state,
+                    paths: state.paths.filter(el => el.id !== "d" + action.payload)
+                }
+
+            })
+            .addCase(removeText, (state, action) => {
+                return {
+                    ...state,
+                    paths: state.paths.filter(el => el.id !== "t" + action.payload)
+                }
+
+            })
+    })
 })
 
 
-export const {addShape, removeShape, updateShapes, addStyle, updateEditor, changeShape, setPath, updateShape} = shapeSlice.actions
+export const {
+    addShape,
+    removeShape,
+    updateShapes,
+    addStyle,
+    updateEditor,
+    changeShape,
+    setPath,
+    updateShape,
+    setObjectInfo,
+    saveObjectInfo,
+    addLink
+} = shapeSlice.actions
 
 export function selectStyles(state, id, category = "shapes") {
-    if (category === "drawing") return state.present[category].style
-    if (category === "text") return state.present[category].texts.find(el=>el.id===id).style
+    if (category === "drawing") return state.present[category]?.style
+    if (category === "text") return state.present[category].texts.find(el => el.id === id)?.style
     const indx = state.present[category.slice(0, -1)][category].findIndex(el => el.id === id)
     return state.present[category.slice(0, -1)][category][indx]?.style
 }

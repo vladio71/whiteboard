@@ -2,7 +2,7 @@ import {useCallback, useEffect, useRef} from "react";
 import {useCanvas} from "./useCanvas";
 import {useAppDispatch} from "../../../redux/hooks";
 import {setPath} from "../../../redux/shapesSlice";
-import {configureContext, useGetItemStyle} from "./Rectangle";
+import {configureContext, setShapeInfo, useGetItemStyle} from "./Rectangle";
 
 
 const Ellipse = ({item}) => {
@@ -31,12 +31,12 @@ const Ellipse = ({item}) => {
         ctx.stroke()
         out.ellipse(centerX, centerY, radiusX + 15, radiusY + 30, Math.PI, 0, 2 * Math.PI)
         p.ellipse(centerX, centerY, radiusX, radiusY, Math.PI, 0, 2 * Math.PI)
-        inside.ellipse(centerX, centerY, radiusX - 15, radiusY - 30, Math.PI, 0, 2 * Math.PI)
+        inside.ellipse(centerX, centerY, Math.abs(radiusX - 15), Math.abs(radiusY - 30), Math.PI, 0, 2 * Math.PI)
+        setShapeInfo(dispatch, item, out, p , inside)
 
-        dispatch(setPath({id: item.id, o: out, i: inside, p: p, center: {x: centerX, y: centerY}}))
 
 
-    }).bind(null, object), [object])
+    }).bind(null, object), [object.center.x, object.center.y, object.angle, object.style,object.down])
     const ref = useCanvas(draw)
 
     return (
