@@ -20,8 +20,6 @@ const Curve = ({curve, isUsable, handleTop, handleBottom}) => {
     const style = useAppSelector(state => selectStyles(state, curve.id, "curves"))
 
 
-    console.log(sample.points)
-
     useEffect(() => {
         setSample({...curve})
     }, [curve.points])
