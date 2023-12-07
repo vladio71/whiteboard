@@ -1,6 +1,6 @@
 import {addDrawing, selectDrawingStyle, updateDrawings} from "../../redux/drawingSlice";
 import {useAppDispatch, useAppSelector} from "../../redux/hooks";
-import {deleteDrawing} from "../../redux/drawingSlice";
+import {removeDrawing} from "../../redux/drawingSlice";
 import {useState} from "react";
 import {checkRectIntersection} from "../Selection/Selection";
 import {setShapeInfo, setRectPath} from "../shape/shapes/Rectangle";
@@ -105,7 +105,7 @@ export const useDrawing = (brush, canvasRef, ctx, down, setDown) => {
             }
              drawings.forEach((rect, id) => {
                 if(checkRectIntersection(selection, rect)){
-                    dispatch(deleteDrawing(rect.id))
+                    dispatch(removeDrawing(rect.id))
                 }
             })
 

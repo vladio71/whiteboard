@@ -6,11 +6,16 @@ import Draw from "../../Drawing/Draw";
 import Text from "../../TextObject/Text";
 import css from './ObjectWithModal.module.css'
 import ContainerPopUp from "../../EditingPopUp/ContainerPopUp";
-import {IoClose} from "react-icons/io5";
+import {saveObjectInfo, removeShape} from "../../../redux/shapesSlice"
 import LinkModal from "./LinkModal";
+import {useAppDispatch} from "../../../redux/hooks";
+import {removeCurve} from "../../../redux/curvesSlice";
+import {removeDrawing} from "../../../redux/drawingSlice";
+import {removeText} from "../../../redux/textSlice";
 
 const ObjectWithModal = ({isUsable, handleBottom, handleTop, el}) => {
 
+    const dispatch = useAppDispatch()
     const [isModalActive, setIsModalActive] = useState(false)
     const [isLinkModalActive, setIsLinkModalActive] = useState(false)
     const [isBackwards, setIsBackwards] = useState(false)
@@ -44,6 +49,15 @@ const ObjectWithModal = ({isUsable, handleBottom, handleTop, el}) => {
 
     function handleCloseLinkModal() {
         setIsLinkModalActive(false)
+    }
+
+    function handleCopy() {
+        dispatch(saveObjectInfo())
+    }
+
+    function handleDelete(id: number) {
+        const func = el?.shape ? removeShape : el?.curve ? removeCurve : el?.stroke ? removeDrawing : removeText
+        dispatch(func(id))
     }
 
 
@@ -88,14 +102,14 @@ const ObjectWithModal = ({isUsable, handleBottom, handleTop, el}) => {
                                 Send to Back
                             </div>
                             <div className={css.modalItem} onMouseDown={handleLinkTo}>
-                                {el?.link ?'Edit Link': 'Add Link'}
+                                {el?.link ? 'Edit Link' : 'Add Link'}
                             </div>
-                            {/*<div className={css.modalItem}>*/}
-                            {/*    Copy*/}
-                            {/*</div>*/}
-                            {/*<div className={css.modalItem}>*/}
-                            {/*    Delete*/}
-                            {/*</div>*/}
+                            <div className={css.modalItem} onMouseDown={handleCopy}>
+                                Copy
+                            </div>
+                            <div className={css.modalItem} onMouseDown={() => handleDelete(el.id)}>
+                                Delete
+                            </div>
 
                         </div>
                     </ContainerPopUp>

@@ -4,7 +4,7 @@ import {combineReducers, configureStore} from '@reduxjs/toolkit'
 import undoable, {includeAction} from 'redux-undo';
 import shapeReducer, {updateShape, addShape, addStyle, removeShape} from './shapesSlice'
 import curveReducer, {updateCurve, addCurve} from './curvesSlice'
-import drawingReducer, {updateDrawing, addDrawing, deleteDrawing} from './drawingSlice'
+import drawingReducer, {updateDrawing, addDrawing, removeDrawing} from './drawingSlice'
 import textReducer, {updateTextObject, addText} from './textSlice'
 import {FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE} from "redux-persist/es/constants";
 
@@ -26,7 +26,7 @@ const rootReducer = undoable(combineReducers({
             addCurve.type,
             updateDrawing.type,
             addDrawing.type,
-            deleteDrawing.type,
+            removeDrawing.type,
             updateTextObject.type,
             addText.type
         ]),

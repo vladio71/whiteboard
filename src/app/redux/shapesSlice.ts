@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit'
 import type {PayloadAction} from '@reduxjs/toolkit'
 import {EditorState} from 'draft-js';
-import {deleteDrawing} from './drawingSlice';
+import {removeDrawing} from './drawingSlice';
 import {removeText} from './textSlice';
 
 export interface shapeSlice {
@@ -97,7 +97,7 @@ export const shapeSlice = createSlice({
     },
     extraReducers: (builder => {
         builder
-            .addCase(deleteDrawing, (state, action) => {
+            .addCase(removeDrawing, (state, action) => {
                 return {
                     ...state,
                     paths: state.paths.filter(el => el.id !== "d" + action.payload)

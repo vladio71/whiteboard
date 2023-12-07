@@ -1,6 +1,6 @@
 import React, {memo, useContext, useEffect, useRef} from "react";
 import ContainerResizeComponent from "../DndResizeRotateContainer/ContainerResizeComponent";
-import {deleteDrawing, updateDrawing} from "../../redux/drawingSlice";
+import {removeDrawing, updateDrawing} from "../../redux/drawingSlice";
 import {draw} from "./useDrawing";
 import RemoveObject from "../Layout/utils/RemoveObject";
 import {useAppDispatch} from "../../redux/hooks";
@@ -24,7 +24,7 @@ const Draw = ({drawing, isUsable}) => {
 
 
     return (
-        <RemoveObject key={drawing.id} removeFunc={deleteDrawing} id={drawing.id}>
+        <RemoveObject key={drawing.id} removeFunc={removeDrawing} id={drawing.id}>
             <ContainerResizeComponent
                 isUsable={isUsable}
                 editorObject={drawing}

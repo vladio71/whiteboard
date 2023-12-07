@@ -77,7 +77,7 @@ const SideBar = ({setShape, setOption, option}) => {
         const {
             newCurve,
             path
-        }=moveCurve(object, d)
+        } = moveCurve(object, d)
 
         dispatch(addCurve({
             ...newCurve,
@@ -107,6 +107,7 @@ const SideBar = ({setShape, setOption, option}) => {
         }
 
         if (e.key.toUpperCase() === 'V' && e.ctrlKey) {
+            if (!savedObject) return
 
             const temp = savedObject.object
             const object = {

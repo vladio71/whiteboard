@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../redux/hooks";
-import {updateDrawing, deleteDrawing} from "../../redux/drawingSlice";
+import {updateDrawing, removeDrawing} from "../../redux/drawingSlice";
 import Draw from "./Draw";
 import {useDrawing} from "./useDrawing";
 import ContainerResizeComponent from "../DndResizeRotateContainer/ContainerResizeComponent";

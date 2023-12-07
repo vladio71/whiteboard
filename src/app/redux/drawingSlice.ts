@@ -28,7 +28,7 @@ export const drawingSlice = createSlice({
             const id = state.drawings.length > 0 ? Math.max(...state.drawings.map(el => el.id)) + 1 : 1
             state.drawings.push({...action.payload, id: id})
         },
-        deleteDrawing: (state, action: PayloadAction<number>) => {
+        removeDrawing: (state, action: PayloadAction<number>) => {
             state.drawings = state.drawings.filter((el) => el.id !== action.payload)
         },
         updateDrawings: (state, action: PayloadAction<number>) => {
@@ -83,7 +83,7 @@ export const drawingSlice = createSlice({
 })
 
 
-export const {addDrawing, deleteDrawing, updateDrawings, updateDrawing, addStyle, setBrush} = drawingSlice.actions
+export const {addDrawing, removeDrawing, updateDrawings, updateDrawing, addStyle, setBrush} = drawingSlice.actions
 
 export function selectDrawingStyle(state) {
     return state.present.drawing.style.selected[state.present.drawing.style.selectedId]
