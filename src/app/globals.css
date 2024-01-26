@@ -1,6 +1,84 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Josefin+Sans&family=Kanit&family=Oswald&family=Playfair+Display&family=Roboto&family=Roboto+Condensed&family=Roboto+Mono&display=swap');
 
 
+:root {
+
+    /*old*/
+    --blue-back: rgba(0, 45, 255, 0.24);
+    --bright-blue: rgb(65, 65, 255);
+    /*--background: rgb(227, 243, 245);*/
+
+    /*--brand: #007bff;*/
+    --brand: hsl(211, 100%, 50%);
+    --brand-hue: 211;
+    --brand-saturation: 100%;
+    --brand-lightness: 50%;
+
+    /*light*/
+    --brand-light: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness));
+    --text1-light: hsl(var(--brand-hue) var(--brand-saturation) 10%);
+    --text2-light: hsl(var(--brand-hue) 30% 30%);
+    --text3-light: hsl(var(--brand-hue) 50% 40%);
+    --surface1-light: hsl(var(--brand-hue) 25% 90%);
+    --surface2-light: hsl(var(--brand-hue) 20% 99%);
+    --surface3-light: hsl(var(--brand-hue) 20% 92%);
+    --surface4-light: hsl(var(--brand-hue) 20% 85%);
+    --surface-shadow-light: var(--brand-hue) 10% calc(var(--brand-lightness) / 5);
+    --shadow-strength-light: .02;
+
+    /*dark*/
+    --brand-dark: hsl(var(--brand-hue) calc(var(--brand-saturation) / 2) calc(var(--brand-lightness) / 1.5));
+    --text1-dark: hsl(var(--brand-hue) 15% 85%);
+    --text2-dark: hsl(var(--brand-hue) 5% 65%);
+    --text3-dark: hsl(var(--brand-hue) 5% 65%);
+    --surface1-dark: hsl(var(--brand-hue) 10% 10%);
+    --surface2-dark: hsl(var(--brand-hue) 14% 18%);
+    --surface3-dark: hsl(var(--brand-hue) 5% 20%);
+    --surface4-dark: hsl(var(--brand-hue) 5% 25%);
+    --surface-shadow-dark: var(--brand-hue) 50% 3%;
+    --shadow-strength-dark: .02;
+
+
+}
+
+
+[data-theme="light"] {
+    --brand: var(--brand-light);
+    --text1: var(--text1-light);
+    --text2: var(--text2-light);
+    --text3: var(--text3-light);
+    --surface1: var(--surface1-light);
+    --surface2: var(--surface2-light);
+    --surface3: var(--surface3-light);
+    --surface4: var(--surface4-light);
+    --surface-shadow: var(--surface-shadow-light);
+    --shadow-strength: var(--shadow-strength-light);
+}
+
+[data-theme="dark"] {
+    --brand: var(--brand-dark);
+    --text1: var(--text1-dark);
+    --text2: var(--text2-dark);
+    --text3: var(--text3-dark);
+    --surface1: var(--surface1-dark);
+    --surface2: var(--surface2-dark);
+    --surface3: var(--surface3-dark);
+    --surface4: var(--surface4-dark);
+    --surface-shadow: var(--surface-shadow-dark);
+    --shadow-strength: var(--shadow-strength-dark);
+
+}
+
+.rad-shadow {
+    box-shadow: 0 2.8px 2.2px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .03)),
+    0 6.7px 5.3px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .01)),
+    0 12.5px 10px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .02)),
+    0 22.3px 17.9px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .02)),
+    0 41.8px 33.4px hsl(var(--surface-shadow) / calc(var(--shadow-strength) + .03)),
+    0 100px 80px hsl(var(--surface-shadow) / var(--shadow-strength));
+}
+
+
 ::-webkit-scrollbar {
     width: 10px;
 }
@@ -27,23 +105,29 @@ body {
     overflow: hidden;
 }
 
+
+
+
+* {
+    box-sizing: border-box;
+    /*transition-all: background .2s;*/
+    transition-delay: 0s;
+
+}
+
+button {
+    cursor: pointer;
+}
+
 canvas {
     position: absolute;
     z-index: -1;
     opacity: 1;
 }
 
-.toolBar {
-    /*position: absolute;*/
-    /*top: 40vh;*/
-    /*left: 1rem;*/
-    border-radius: .4rem;
-    /*width: 2.5rem;*/
-    height: 30vh;
-    background: rgba(255, 255, 255, 0.45);
-    box-shadow: 0px 0px 5px 3px rgba(50, 50, 56, 0.16);
-    min-height: 260px;
-
+a {
+    color: #000000;
+    text-decoration: none;
 }
 
 
@@ -60,7 +144,7 @@ canvas {
     width: 200px;
     height: 120px;
     background: #fcfca5;
-    box-shadow: 2px 2px 5px black;
+    box-shadow: 2px 2px 5px #000000;
 
 }
 
@@ -68,20 +152,55 @@ canvas {
     position: relative;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
+    /*overflow: auto;*/
+
 
 }
+
+.back-image {
+    position: absolute;
+    background: var(--surface1);
+    inset: 0;
+    width: calc(100vw * 4);
+    height: calc(100vh * 4);
+    opacity: .8;
+    z-index: -10;
+    overflow: hidden;
+    transition: .1s;
+}
+
+.back-image:before {
+    content: "";
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    inset: 0;
+    left: -50%;
+    z-index: -1;
+    background: url("https://i.pinimg.com/564x/cd/1e/51/cd1e5119381dcef11e0b6ced16438cc3.jpg") 0 0 repeat;
+    opacity: .1;
+    filter: invert(1);
+    transform: rotate(90deg);
+}
+
+/*[data-theme="light"] .back-image {*/
+/*    background: var(--surface1);*/
+/*}*/
+
+[data-theme="light"] .back-image:before {
+    filter: invert(0);
+}
+
 
 .background {
     position: absolute;
-    width: 100vw;
-    height: 100vh;
-    /*inset: 0;*/
-    opacity: .1;
-    background-image: url("/square.jpg");
-    box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.5);
-    /*z-index: -10;*/
-
+    width: calc(100vw * 4);
+    height: calc(100vh * 4);
+    inset: 0;
+    overflow: hidden;
 }
+
 
 .wrapper {
     position: absolute;
@@ -100,11 +219,12 @@ canvas {
 
 }
 
-input{
+input {
     width: 100%;
     padding: .3rem .6rem;
 
 }
+
 button {
     background: #3f42ff;
     color: white;
@@ -206,6 +326,13 @@ button {
     height: auto;
     text-align: center;
     overflow: hidden;
-    /*max-height: 75%;*/
-    /*padding: 1rem;*/
 }
+
+
+/*[data-theme='dark'] .back-image {*/
+/*    !*color: white;*!*/
+/*    background: #12805b;*/
+/*}*/
+
+
+/*[data-theme='dark'] */

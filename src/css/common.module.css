@@ -1,0 +1,72 @@
+
+.modal {
+    display: grid;
+    font-size: .7rem;
+    padding: 12px 0;
+}
+
+
+[data-theme="dark"] .modal {
+    color: white;
+}
+
+.modal > * {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.modal > *:hover {
+    color: #3f42ff;
+}
+
+
+.loader {
+    display: block;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(transparent, rgba(248, 248, 248, 0.34), #717686, transparent);
+    mask-image: radial-gradient(rgba(255, 255, 255, 0) 30%, #000000 90%);
+    background-repeat: no-repeat;
+    animation: 1s round infinite linear;
+    z-index: 100;
+}
+
+.boardLoader {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.button {
+    padding: 4px 10px;
+    height: 60%;
+    border-radius: 5px;
+    align-items: center;
+    display: flex;
+    color: var(--text1);
+    background: var(--surface3);
+    transition: .2s;
+}
+
+
+.button:hover {
+    color: var(--text2);
+    background: var(--surface4);
+}
+
+@keyframes round {
+
+    0% {
+
+    }
+    100% {
+        transform: rotate(360deg);
+
+    }
+}

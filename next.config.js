@@ -6,6 +6,10 @@ const nextConfig = {
     typescript: {
         ignoreBuildErrors: true,
     },
+    // basePath: '/src',
+    images: {
+        domains: ['r4.wallpaperflare.com', "ucarecdn.com"],
+    },
 }
 
 module.exports = nextConfig

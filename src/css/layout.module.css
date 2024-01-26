@@ -1,0 +1,207 @@
+
+.popUp {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    row-gap: .5rem;
+}
+
+.drawingPopUp {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    row-gap: .5rem;
+    width: 100%;
+    height: 100%;
+}
+
+.popUp .item,
+.drawingPopUp .item {
+    padding: 0;
+}
+
+.popUpPosition {
+    position: absolute;
+    left: 4rem;
+    animation: .1s linear 0s appear;
+    top: 2rem;
+}
+
+.popUp > *,
+.drawingPopUp > * {
+    margin: .2rem;
+}
+
+.item * {
+    height: 100%;
+    width: 100%;
+    display: block;
+}
+
+.item {
+    position: relative;
+    color: var(--text1);
+    /*height: 1.2rem;*/
+    /*width: 1.2rem;*/
+    padding: .5rem;
+    transition: .2s ease-in-out;
+}
+
+.item:hover {
+    border-radius: 5px;
+    background: var(--surface3);
+    color: var(--text3);
+}
+
+.selectedTool {
+    border-radius: .3rem;
+    background: var(--surface3);
+    color: var(--text3);
+}
+
+@keyframes appear {
+
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+
+.sideBar {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    /*margin-top: 30%;*/
+    top: calc(30%);
+    left: 2vh;
+    z-index: 100;
+
+}
+
+.toolBar {
+    border-radius: 5px;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1vh 0;
+    transition: 0s;
+    justify-content: space-between;
+    height: 28vh;
+    width: 2.5rem;
+    background: var(--surface2);
+    /*box-shadow: 0px 0px 5px 3px rgba(50, 50, 56, 0.16);*/
+
+}
+
+
+.caption {
+    position: absolute;
+    left: 3rem;
+    top: .2rem;
+    border-radius: .3rem;
+    white-space: nowrap;
+    width: fit-content;
+    height: fit-content;
+    background: black;
+    font-size: .7rem;
+    padding: .6rem;
+    color: white;
+}
+
+.caption:before {
+    content: "";
+    position: absolute;
+    left: -8px;
+    top: .8rem;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-right: 8px solid black;
+    border-bottom: 5px solid transparent;
+
+}
+
+
+.option * {
+    font-size: 1.3rem;
+    margin: .4rem .2rem;
+    padding: .1rem;
+    transition: .1s ease-in-out;
+}
+
+.option {
+    position: relative;
+}
+
+.selected {
+    color: blue;
+}
+
+.option:hover {
+    color: blue;
+}
+
+.horizontalDivider {
+    position: absolute;
+    bottom: -1rem;
+    width: 100%;
+    border-top: 1px solid rgba(128, 128, 128, 0.67);
+    left: -.2rem;
+}
+
+.colorBorder {
+    width: 1.3rem;
+    height: 1.3rem;
+    background: white;
+    border: 1px black solid;
+    margin: .4rem auto;
+    border-radius: 50%;
+}
+
+.alinedPopUp {
+    position: absolute;
+    top: .4rem;
+    left: 3.8rem;
+}
+
+.colorCircle {
+
+    border-radius: 50%;
+
+}
+
+
+.rhombus {
+    color: inherit;
+    background-image: url("/rhomb.png");
+    background-size: cover;
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+}
+
+.bottomSection {
+    position: fixed;
+    width: 2.5rem;
+    bottom: 28vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1vh 0;
+    flex-direction: column;
+    border-radius: 5px;
+    height: 9vh;
+    background: var(--surface2);
+    /*box-shadow: 0px 0px 5px 3px rgba(50, 50, 56, 0.16);*/
+}
+
+
+
+

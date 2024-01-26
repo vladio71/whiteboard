@@ -1,18 +1,18 @@
 "use client"
 
 import * as React from "react";
-import Droppable from "./Components/Layout/utils/Droppable";
-import SideBar from "./Components/Layout/SideBar";
-import CurvesCanvas from "./Components/BezierCurves/CurvesCanvas";
-import Drawing from "./Components/Drawing/Drawing";
-import Selection from "./Components/Selection/Selection";
-import TextTool from "./Components/TextObject/TextTool";
-import RenderResizeShape from "./Components/shape/RenderResizeShape";
-import RemoveObject from "./Components/Layout/utils/RemoveObject";
-import {useHome} from "./useHome";
-import {createContext, Dispatch, useState} from "react";
-import LayersComponent from "./Components/Layout/LayersComponent";
-
+import {createContext, Dispatch, useEffect, useState} from "react";
+import Board from "components/layout/Board/Board";
+import {useAppDispatch, useAppSelector} from "../redux/hooks";
+import {useRouter} from 'next/navigation';
+import {deleteBoard, auth, getUserBoards, updateBoard} from "@/firebase/firebase";
+import {SignOut} from "@/firebase/auth";
+import css from "components/layout/Board/Board.module.css";
+import {FaPlus} from "react-icons/fa";
+import GlassModalAddBoard from "../components/layout/EditingPopUp/GlassModal/GlassModalAddBoard";
+import {ActionCreators} from "redux-undo";
+import LoaderPlaceHolder from "components/layout/utils/LoaderPlaceHolder";
+import {setWhiteboardData} from "../redux/Slices/shapesSlice";
 
 export interface Point {
     x: number,
@@ -21,64 +21,131 @@ export interface Point {
 
 interface Context {
     setOption: Dispatch<string>,
+    option: string,
     setStart: Dispatch<Point>,
     setShapeId: Dispatch<number>,
     start: Point,
-    shapeId: number
+    shapeId: number,
+    zoomId: number,
+    setZoomId: Dispatch<number>,
+
 }
 
 
 export const LevelContext = createContext<Context | null>(null);
 
-
 function Home() {
 
-    const [start, setStart] = useState<Point>({x: 0, y: 0})
-    const [shapeId, setShapeId] = useState<number>(-1)
+
+    const [boards, setBoards] = useState([])
+    const [isModalActive, setIsModalActive] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const router = useRouter()
+    const dispatch = useAppDispatch()
+
+    useEffect(() => {
+
+        // console.log(auth.currentUser)
+        // console.log(!auth.currentUser || !auth.currentUser?.emailVerified)
+        if (!auth.currentUser || !auth.currentUser?.emailVerified) {
+            router.push("/auth")
+        } else {
+            setIsLoading(true)
+            getUserBoards(setBoards).then(() => {
+                setIsLoading(false)
+            })
+         }
+
+    }, [auth.currentUser])
+
+    useEffect(() => {
+
+        dispatch(setWhiteboardData())
+        dispatch(ActionCreators.clearHistory())
+        dispatch({type: 'store/reset'})
+    }, [])
 
 
-    const {
-        option,
-        setOption,
-        setShape,
-        handleRemoveShape,
-        handleAddShape,
-        shapes,
-    } = useHome()
+    const handleOpenModal = () => {
+        setIsModalActive(true)
+    }
+    const handleCloseModal = () => {
+        setIsModalActive(false)
+    }
+
+    const handleDeletion = (id) => {
+        deleteBoard(id).then(() => {
+            setBoards(prev => {
+                return [
+                    ...prev.filter(el => el.id !== id)
+                ]
+            })
+        })
+    }
+
+    const handleUpdate = (id, data) => {
+        updateBoard(id, data).then(() => {
+            getUserBoards(setBoards)
+        })
+
+    }
+    const handleSignOut = () => {
+        router.push("/auth")
+        SignOut()
+    }
 
     return (
 
-        <div className={'back'} onClick={handleAddShape}>
+        <div className={css.Wrapper}>
+            <div className={css.mainMenu}>
+                <div className={css.mainMenu_header}>
+                <span>
+                    WhiteBoard
+                </span>
+                    <button onClick={handleSignOut} className={css.signOutBtn}>
+                        Sign Out
+                    </button>
+                </div>
 
-            <div className={'background'}/>
-            {/*<Droppable>*/}
-            <>
-                <LevelContext.Provider value={{
-                    setOption,
-                    start,
-                    setStart,
-                    shapeId,
-                    setShapeId
-                }}>
-                    {/*{shapes.map(shape => {*/}
-                    {/*    return <RemoveObject key={shape.id} handleRemove={handleRemoveShape} id={shape.id}>*/}
-                    {/*        <RenderResizeShape item={shape} setOption={setOption}/>*/}
-                    {/*    </RemoveObject>*/}
-                    {/*})}*/}
-                    <CurvesCanvas add={option === "Curve"} setShape={setOption} isUsable={option}/>
+                <div className={css.mainMenu_content}>
+                    <GlassModalAddBoard
+                        handleCloseModal={handleCloseModal}
+                        isModalActive={isModalActive}
+                    />
+                    <div className={css.board}>
+                        <div className={css.newBoard} onClick={handleOpenModal}>
+                            <div className={css.newBoard_Icon}>
+                                <FaPlus style={{
+                                    fontSize: '1.5rem'
+                                }}/>
+                            </div>
+                            <div>
+                                New Board
+                            </div>
+                        </div>
+                        {/*</Link>*/}
+                    </div>
+                    {isLoading &&
+                    <div className={css.loaderPlaceholder}>
+                        <LoaderPlaceHolder />
+                    </div>
+                    }
 
-                    <Selection isUsed={option === "Selection"}/>
-                    <Drawing isUsed={option === "Drawing"} isUsable={option}/>
-                    <LayersComponent isUsable={option}/>
-                    <TextTool isUsed={option === "Text"} setOption={setOption}/>
-                </LevelContext.Provider>
 
+                    {boards.map(board => {
+                        return <Board
+                            key={board.id}
+                            id={board.id}
+                            common={board.common}
+                            handleDeletion={handleDeletion}
+                            handleUpdate={handleUpdate}
+                        />
+                    })}
+                </div>
 
-            </>
-            {/*</Droppable>*/}
-            <SideBar setShape={setShape} setOption={setOption} option={option}/>
+            </div>
         </div>
-    )
+    );
 }
 
 

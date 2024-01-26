@@ -1,0 +1,258 @@
+.mainMenu {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: 100px 1fr;
+    width: 100vw;
+    height: 100vh;
+    color: var(--text1);
+    background: var(--surface1);
+    padding: 2.25rem;
+}
+
+.loaderPlaceholder {
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translateX(-50%);
+}
+
+.backImageLoader {
+    content: '';
+    position: absolute;
+    /*inset: -2%;*/
+    filter: blur(3px);
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+}
+
+.Wrapper {
+    position: absolute;
+    inset: 0;
+}
+
+
+
+.mainMenu_header {
+    display: flex;
+    user-select: none;
+    justify-content: space-between;
+    height: 2rem;
+    align-items: center;
+
+}
+
+.mainMenu_content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-left: 10vw;
+
+}
+
+.newBoard {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 4rem;
+    padding-bottom: 2rem;
+    align-items: center;
+    height: 300px;
+    background: #3f42ff;
+    color: var(--surface2-light);
+}
+
+.newBoard:hover {
+    background: #0000ec;
+}
+
+.newBoard:hover .newBoard_Icon {
+    transform: rotate(90deg);
+}
+
+.newBoard_Icon {
+    justify-self: center;
+    transition: .4s;
+}
+
+.Modal {
+    display: flex;
+    flex-direction: column;
+    padding: 3rem 2rem 0rem;
+    gap: 1rem;
+    z-index: 3;
+    position: absolute;
+    /*color: black;*/
+    width: 400px;
+    height: 260px;
+    border-radius: 5px;
+    margin: auto;
+    left: 50%;
+    top: 50%;
+    /*background: rgba(123, 92, 92, 0.56);*/
+    /*background: var(--surface4);*/
+    backdrop-filter: blur(5px);
+    transform: translate(-50%, -50%);
+}
+
+.Modal:after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--surface4);
+    opacity: .6;
+    z-index: -1;
+
+}
+
+.Modal img {
+    object-fit: cover;
+    object-position: center;
+
+}
+
+.Modal_close {
+    position: absolute;
+    right: .5rem;
+    top: .5rem;
+    background: transparent;
+    color: red;
+    font-size: 1.5rem;
+    transition: .2s;
+    transition-delay: 0;
+}
+
+.Modal_close:hover {
+    color: #c40f0f;
+
+}
+
+.Modal_button {
+    background: black;
+    width: 50%;
+    border-radius: 2px;
+    font-size: .8rem;
+}
+
+.Modal_button:hover {
+    background: #1c1b1b;
+    /*background: red;*/
+}
+
+
+.board {
+    display: flex;
+    color: var(--text2);
+    flex-direction: column;
+    position: relative;
+    height: fit-content;
+    border-radius: 5px;
+    overflow: hidden;
+    width: 10vw;
+    min-height: 300px;
+    min-width: 200px;
+    /*box-shadow: 0px 1px 6px 6px rgba(177, 88, 88, 0.24);*/
+    transition: .6s;
+}
+
+.board:hover {
+    box-shadow: 0px 2.8px 2.2px rgba(0, 0, 0, 0.003),
+    0px 6.7px 5.3px rgba(0, 0, 0, 0.004),
+    0px 12.5px 10px rgba(0, 0, 0, 0.005),
+    0px 22.3px 17.9px rgba(0, 0, 0, 0.006),
+    0px 41.8px 33.4px rgba(0, 0, 0, 0.007),
+    0px 100px 80px rgba(0, 0, 0, 0.01);
+
+}
+
+.editBoard {
+    position: absolute;
+    color: white;
+    right: .5rem;
+    top: .5rem;
+}
+
+
+.contextMenu {
+    position: absolute;
+    left: 8rem;
+    top: -2rem;
+}
+
+.board img {
+    object-position: center;
+    height: 250px;
+    object-fit: cover;
+}
+
+
+.heading {
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+    padding: .5rem;
+    flex: 1;
+    color: var(--text2-light);
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    background: white;
+}
+
+.signOutBtn {
+    transition: .3s;
+    background: white;
+    color: var(--text2-light);
+    cursor: pointer;
+}
+
+.signOutBtn:hover {
+    background: var(--surface1);
+    color: red;
+}
+
+.caption {
+    font-size: .65rem;
+}
+
+.about {
+    font-size: .5rem;
+    position: relative;
+}
+
+.about:after {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 1px;
+    bottom: calc(-.5rem + 1px);
+    background: #dcd3d3;
+}
+
+.board_button {
+    background: black;
+    font-size: .55rem;
+    padding: 8px 20px;
+    max-width: 80px;
+    transition: .2s;
+}
+
+.board_button:hover {
+    background: #2a2828;
+}
+
+
+.tagItem {
+    font-size: .45rem;
+    display: inline-block;
+    background: #ffffff;
+    border: 1px solid black;
+    margin: 2px;
+    border-radius: 1rem;
+    padding: 4px 10px;
+}
