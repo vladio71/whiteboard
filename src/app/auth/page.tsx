@@ -50,12 +50,7 @@ const Page = () => {
         dispatch(setAuthStatus(true))
         createNewUser(values.email, values.password).then(res => {
             dispatch(setAuthStatus(false))
-        }, err => {
-            // toast.error("Something went wrong!")
-            // toast.error("Please try again later.")
-            // toast.error(err.message)
-        })
-
+        }
     }
 
     function handleSignIn(values) {
@@ -81,7 +76,6 @@ const Page = () => {
     return (
         <div className={css.Wrapper}>
             <div className={css.background}>
-                {/*<div className={css.backgroundCardA}/>*/}
                 <div className={css.authCard}>
                     <div className={css.authHeader}>
                         <div
@@ -104,7 +98,7 @@ const Page = () => {
                 </div>
             </div>
             <div className={css.backImage}>
-                <Image src={'https://ucarecdn.com/41970661-842a-47da-88bb-d7c8598e8851/-/quality/smart/-/format/auto/'}
+                <Image src={'https://ucarecdn.com/52d4790f-9ab2-4ba9-828b-3b49a970b773/'}
                        alt={'backImage'}
                        quality="100"
                        fill={true}
