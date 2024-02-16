@@ -12,6 +12,7 @@ import {setTimeout} from "timers";
 import { AiOutlineSave } from "react-icons/ai"
 import { GoPlus } from "react-icons/go";
 import { FiMinus } from "react-icons/fi";
+import usePreventOutsideMouseEvents from "../../../app/hooks/usePreventMouseEvents";
 
 
 
@@ -19,16 +20,10 @@ import { FiMinus } from "react-icons/fi";
 const ZoomBar = ({common}) => {
 
     const {zoomId, setZoomId} = useContext(LevelContext)
-    const tableRef = useRef(null)
     const dispatch = useAppDispatch()
     const [timer, setTimer] = useState(false)
 
-    useEffect(() => {
-        if (tableRef.current) {
-            tableRef.current.addEventListener('mouseup', preventTools)
-            tableRef.current.addEventListener('mousedown', preventTools)
-        }
-    }, [])
+    const tableRef = usePreventOutsideMouseEvents()
 
     const zoomInHandler = () => {
         if (zoomId < 8)
@@ -51,7 +46,7 @@ const ZoomBar = ({common}) => {
     return (
         <div className={css.container} ref={tableRef}>
 
-            <ContainerPopUp width={270} height={'2.5rem'}>
+            <ContainerPopUp width={270} height={'2.5rem'} isBottomPositioned={false}>
                 <div className={`${css.flexZoom}`}>
                     <button className={comCss.button} onClick={zoomOutHandler}>
                         <FiMinus  style={{

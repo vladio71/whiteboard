@@ -45,6 +45,7 @@ const SelectionTool = ({isUsed}) => {
 
     function getRect(object) {
         if (object === undefined) return
+
         return {
             x: object.x - 20,
             y: object.y - 20,
@@ -56,8 +57,6 @@ const SelectionTool = ({isUsed}) => {
     function handleDown(e) {
         if (e.which == 2) return
 
-        // console.log(e.which)
-        // console.log(e.which == 2)
 
         const selection = {
             x: (e.clientX + common.scrollX) / common.scale,

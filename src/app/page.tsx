@@ -1,18 +1,23 @@
-"use client"
-
-import * as React from "react";
-import {createContext, Dispatch, useEffect, useState} from "react";
-import Board from "components/layout/Board/Board";
+'use client'
+import React, {createContext, Dispatch, useEffect, useRef, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../redux/hooks";
-import {useRouter} from 'next/navigation';
-import {deleteBoard, auth, getUserBoards, updateBoard} from "@/firebase/firebase";
-import {SignOut} from "@/firebase/auth";
-import css from "components/layout/Board/Board.module.css";
-import {FaPlus} from "react-icons/fa";
-import GlassModalAddBoard from "../components/layout/EditingPopUp/GlassModal/GlassModalAddBoard";
-import {ActionCreators} from "redux-undo";
-import LoaderPlaceHolder from "components/layout/utils/LoaderPlaceHolder";
-import {setWhiteboardData} from "../redux/Slices/shapesSlice";
+import {selectCommon, setBoardId, setBoardName, setFetchStatus, setRefreshFlag} from "../redux/Slices/commonSlice";
+import {useParams} from "next/navigation";
+import {fetchData} from "../redux/Slices/shapesSlice";
+import {auth} from "@/firebase/firebase";
+import {useHome} from "./hooks/useHome";
+import {useScreenMove} from "./hooks/useScreenMove";
+import LayersComponent from "../components/layout/LayersComponent";
+import CurvesCreationTool from "../components/tools/BezierCurves/CurvesCreationTool";
+import SelectionTool from "../components/tools/Selection/SelectionTool";
+import DrawingTool from "../components/tools/Drawing/DrawingTool";
+import TextCreationTool from "../components/tools/Text/TextCreationTool";
+import SignInBar from "../components/layout/SignInBar/SignInBar";
+import ZoomBar from "../components/layout/ZoomBar/ZoomBar";
+import SideBar from "../components/layout/SideBar";
+import css from 'css/common.module.css'
+import LoaderPlaceHolder from "../components/layout/utils/LoaderPlaceHolder";
+
 
 export interface Point {
     x: number,
@@ -34,119 +39,134 @@ interface Context {
 
 export const LevelContext = createContext<Context | null>(null);
 
-function Home() {
 
+export default function Home() {
 
-    const [boards, setBoards] = useState([])
-    const [isModalActive, setIsModalActive] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const router = useRouter()
     const dispatch = useAppDispatch()
+    const common = useAppSelector(selectCommon)
+    const [start, setStart] = useState<Point>({x: 0, y: 0})
+    const workerRef = useRef(null);
+    const mountRef = useRef(true);
+    const [shapeId, setShapeId] = useState<number>(-1)
+    const state = useAppSelector(state => state.present);
+    const params = useParams()
 
     useEffect(() => {
 
-        // console.log(auth.currentUser)
-        // console.log(!auth.currentUser || !auth.currentUser?.emailVerified)
-        if (!auth.currentUser || !auth.currentUser?.emailVerified) {
-            router.push("/auth")
-        } else {
-            setIsLoading(true)
-            getUserBoards(setBoards).then(() => {
-                setIsLoading(false)
-            })
-         }
 
-    }, [auth.currentUser])
+        if (params.id !== "new" && params.id) {
+            if (!state.common.isRefreshed && mountRef.current) {
+                dispatch(fetchData(params.id))
+            }
+            dispatch(setBoardId(params.id))
+        }else {
+            dispatch(setFetchStatus(true))
+        }
+        dispatch(setRefreshFlag(true))
 
-    useEffect(() => {
-
-        dispatch(setWhiteboardData())
-        dispatch(ActionCreators.clearHistory())
-        dispatch({type: 'store/reset'})
+        if (params?.boardName) {
+            dispatch(setBoardName(params?.boardName))
+        }
+        return () => {
+            mountRef.current = false
+        }
     }, [])
 
 
-    const handleOpenModal = () => {
-        setIsModalActive(true)
-    }
-    const handleCloseModal = () => {
-        setIsModalActive(false)
-    }
+    useEffect(() => {
+        workerRef.current = new Worker(new URL("./worker.ts", import.meta.url));
+    }, []);
 
-    const handleDeletion = (id) => {
-        deleteBoard(id).then(() => {
-            setBoards(prev => {
-                return [
-                    ...prev.filter(el => el.id !== id)
-                ]
-            })
-        })
-    }
 
-    const handleUpdate = (id, data) => {
-        updateBoard(id, data).then(() => {
-            getUserBoards(setBoards)
-        })
+    useEffect(() => {
 
-    }
-    const handleSignOut = () => {
-        router.push("/auth")
-        SignOut()
-    }
+        function saveDataBeforeUnload() {
+            workerRef.current?.postMessage({
+                userId: auth?.currentUser?.uid,
+                boardId: params.id,
+                data: {
+                    ...state,
+                    shape: {
+                        ...state.shape,
+                        paths: []
+                    }
+                }
+            });
+        }
+
+
+        window.addEventListener("visibilitychange", saveDataBeforeUnload)
+        return () => {
+            window.removeEventListener("visibilitychange", saveDataBeforeUnload)
+        }
+    }, [state])
+
+
+    const {
+        option,
+        setOption,
+        setShape,
+        handleAddShape,
+        userView,
+        isReady,
+        fieldRef,
+        backImage,
+        zoomId,
+        setZoomId,
+        moveDown
+    } = useHome(params.id)
+    //
+    //
+    useScreenMove(userView, option, setOption)
+    //
+    //
+
 
     return (
+        <>
+            <div>
+                {(!isReady || !common.fetchStatus) &&
+                    <div className={css.boardLoader}>
+                        Loading...
+                        <LoaderPlaceHolder/>
+                    </div>
+                }
+                <div style={{
+                    visibility: `${isReady && common.fetchStatus ? 'unset' : 'hidden'}`
+                }} className={'back'} ref={userView} onClick={handleAddShape}>
+                    <LevelContext.Provider value={{
+                        setOption,
+                        option,
+                        start,
+                        setStart,
+                        shapeId,
+                        setShapeId,
+                        zoomId,
+                        setZoomId
+                    }}>
 
-        <div className={css.Wrapper}>
-            <div className={css.mainMenu}>
-                <div className={css.mainMenu_header}>
-                <span>
-                    WhiteBoard
-                </span>
-                    <button onClick={handleSignOut} className={css.signOutBtn}>
-                        Sign Out
-                    </button>
-                </div>
-
-                <div className={css.mainMenu_content}>
-                    <GlassModalAddBoard
-                        handleCloseModal={handleCloseModal}
-                        isModalActive={isModalActive}
-                    />
-                    <div className={css.board}>
-                        <div className={css.newBoard} onClick={handleOpenModal}>
-                            <div className={css.newBoard_Icon}>
-                                <FaPlus style={{
-                                    fontSize: '1.5rem'
-                                }}/>
-                            </div>
-                            <div>
-                                New Board
-                            </div>
+                        <div ref={backImage} className={'back-image'}/>
+                        <div ref={fieldRef} className={'background'}>
+                            <LayersComponent isUsable={option}/>
                         </div>
-                        {/*</Link>*/}
-                    </div>
-                    {isLoading &&
-                    <div className={css.loaderPlaceholder}>
-                        <LoaderPlaceHolder />
-                    </div>
-                    }
+                        <CurvesCreationTool add={option === "Curve"} setShape={setOption} isUsable={option}/>
+                        <SelectionTool isUsed={option === "Selection"}/>
+                        <DrawingTool isUsed={option === "Drawing"} isUsable={option}/>
+                        <TextCreationTool isUsed={option === "Text"} setOption={setOption}/>
+                        <SignInBar/>
+                        <ZoomBar common={common}/>
+                        <SideBar setShape={setShape} setOption={setOption} option={option}/>
 
+                    </LevelContext.Provider>
 
-                    {boards.map(board => {
-                        return <Board
-                            key={board.id}
-                            id={board.id}
-                            common={board.common}
-                            handleDeletion={handleDeletion}
-                            handleUpdate={handleUpdate}
-                        />
-                    })}
                 </div>
 
             </div>
-        </div>
+        </>
     );
-}
+};
 
 
-export default Home
+
+
+

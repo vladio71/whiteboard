@@ -1,7 +1,7 @@
 import {MdOutlineRectangle} from "react-icons/md";
 import {BsPen} from "react-icons/bs";
 import * as React from "react";
-import {useEffect, useRef, useState} from "react";
+import {memo, useEffect, useRef, useState} from "react";
 import css from '../../css/layout.module.css'
 import {HiArrowNarrowUp} from "react-icons/hi";
 import {LuMousePointer2} from "react-icons/lu";
@@ -21,14 +21,16 @@ import {Point} from "../../app/page";
 import {preventTools} from "app/utils/utils";
 import {selectCommon} from "redux/Slices/commonSlice";
 import {moveCurve} from "../tools/BezierCurves/utils";
+import {ChromePicker} from "react-color";
 
 
-const SideBar = ({setShape, setOption, option}) => {
+const SideBar = memo(({setShape, setOption, option}) => {
 
     const dispatch = useAppDispatch()
 
     const [open, setOpen] = useState('')
     const popUps = useRef(null)
+    const [selected, setSelected] = useState(1)
     const [toggle, setToggle] = useState(false)
     const [mousePosition, setMousePosition] = useState<Point>({x: 0, y: 0})
     const [caption, setCaption] = useState('')
@@ -63,8 +65,8 @@ const SideBar = ({setShape, setOption, option}) => {
         window.addEventListener('mousemove', saveMousePosition)
 
         if (toolbarRef.current) {
-            toolbarRef.current.addEventListener('mouseup', preventTools)
-            toolbarRef.current.addEventListener('mousedown', preventTools)
+            // toolbarRef.current.addEventListener('mouseup', preventTools)//FOUND BUG
+            // toolbarRef.current.addEventListener('mousedown', preventTools)
         }
 
 
@@ -106,14 +108,18 @@ const SideBar = ({setShape, setOption, option}) => {
 
 
     function handleKeyDown(e) {
-        if (e.key.toUpperCase() === 'Z' && e.ctrlKey && e.shiftKey) {
-            dispatch(ActionCreators.redo())
-        } else if (e.key.toUpperCase() === 'Z' && e.ctrlKey) {
-            dispatch(ActionCreators.undo())
 
+        if (e.code === "KeyZ" && e.ctrlKey && e.shiftKey) {
+            e.preventDefault()
+            e.stopPropagation()
+            dispatch(ActionCreators.redo())
+        } else if (e.code === "KeyZ" && e.ctrlKey) {
+            e.preventDefault()
+            e.stopPropagation()
+            dispatch(ActionCreators.undo())
         }
 
-        if (e.key === "Backspace" || e.key === "Delete") {
+        if (e.code === "Backspace" || e.code === "Delete") {
             dispatch(updateDrawings(drawings.filter(el => !el.selected)))
             dispatch(updateCurves(curves.filter(el => !el.selected)))
             dispatch(updateShapes(shapes.filter(el => !el.selected)))
@@ -122,19 +128,16 @@ const SideBar = ({setShape, setOption, option}) => {
 
         }
 
-        if (e.key.toUpperCase() === 'C' && e.ctrlKey) {
+        if (e.code === 'KeyC' && e.ctrlKey) {
             dispatch(saveObjectInfo())
         }
 
-        if (e.key.toUpperCase() === 'V' && e.ctrlKey) {
+        if (e.code === 'KeyV' && e.ctrlKey) {
             if (!savedObject) return
 
             // const temp = (savedObject.object?.borders|| savedObject.object)
             const temp = (savedObject.object)
 
-            console.log((mousePositionRef.current.x + common.scrollX) / common.scale - temp.w / 2)
-            console.log((mousePositionRef.current.x + common.scrollX) / common.scale)
-            console.log(temp)
             const object = {
                 ...temp,
                 x: (mousePositionRef.current.x + common.scrollX) / common.scale - (temp?.borders?.w || temp.w) / 2,
@@ -156,7 +159,7 @@ const SideBar = ({setShape, setOption, option}) => {
             }
         }
 
-        if (e.key.toUpperCase() === 'A' && e.altKey) {
+        if (e.code === 'KeyA' && e.altKey) {
             setOpen('')
             setOption("Selection")
             dispatch(updateDrawings(drawings.map(el => {
@@ -177,7 +180,7 @@ const SideBar = ({setShape, setOption, option}) => {
             setToggle(!toggle)
         }
 
-        if (e.key.toUpperCase() === 'V') {
+        if (e.code === 'KeyV') {
             setOpen('')
             if (option === 'Selection') {
                 setOption('Move')
@@ -185,11 +188,11 @@ const SideBar = ({setShape, setOption, option}) => {
                 setOption('Selection')
             }
         }
-        if (e.key.toUpperCase() === 'T') {
+        if (e.code === 'KeyT') {
             setOpen('')
             setOption("Text")
         }
-        if (e.key.toUpperCase() === 'D') {
+        if (e.code === 'KeyD') {
             if (open !== 'Drawing') {
                 setOpen('Drawing')
             } else {
@@ -197,7 +200,7 @@ const SideBar = ({setShape, setOption, option}) => {
             }
             setOption("Drawing")
         }
-        if (e.key.toUpperCase() === 'S') {
+        if (e.code === 'KeyS') {
             if (open !== 'Shape') {
                 setOpen('Shape')
             } else {
@@ -205,7 +208,7 @@ const SideBar = ({setShape, setOption, option}) => {
             }
             setOption("Shape")
         }
-        if (e.key.toUpperCase() === 'C' && !e.ctrlKey) {
+        if (e.code === 'KeyC' && !e.ctrlKey) {
             setOpen('')
             setOption("Curve")
         }
@@ -223,141 +226,147 @@ const SideBar = ({setShape, setOption, option}) => {
 
 
     return (
-        <div
-            onMouseDown={e => {
-                e.preventDefault()
-                e.stopPropagation();
-                e.nativeEvent.stopImmediatePropagation()
-            }}
-            onMouseUp={e => {
-                if (!popUps.current || popUps.current.contains(e.target)) return;
-                e.stopPropagation();
-            }}
-            className={css.sideBar}
+        <>
+            <div
+                onMouseDown={e => {
+                    e.preventDefault()
+                    e.stopPropagation();
+                    e.nativeEvent.stopImmediatePropagation()
+                }}
+                onMouseUp={e => {
+                    if (!popUps.current || popUps.current.contains(e.target)) return;
+                    e.stopPropagation();
+                }}
+                className={css.sideBar}
 
-        >
-            <div className={`${css.toolBar} rad-shadow`}
-                 ref={toolbarRef}
-                 onKeyDown={handleKeyDown}>
-                <div className={option === 'Selection' ? `${css.item} ${css.selectedTool}` : css.item}
-                     onMouseEnter={() => handleEnter('Selection')}
-                     onMouseLeave={handleLeave}
-                     onClick={() => {
-                         if (option === 'Selection') {
-                             setOption('Move')
-                         } else {
-                             setOption('Selection')
-                         }
-                         setOpen('')
-                     }}>
-                    {caption === 'Selection' && open === '' &&
-                        <CaptionOnHover text={'Select'} short={"V, alt + A"}/>
-                    }
-                    <LuMousePointer2/>
-                </div>
-                <div className={option === 'Drawing' ? `${css.item} ${css.selectedTool}` : css.item}
-                     onMouseEnter={() => handleEnter('Drawing')}
-                     onMouseLeave={handleLeave}
-                     onClick={() => {
-                         setOption('Drawing')
-                         handleOpenPopUp('Drawing')
-                     }}>
-                    {caption === 'Drawing' && open === '' &&
-                        <CaptionOnHover text={'Draw'} short={"D"}/>
-                    }
-                    <BsPen/>
-                </div>
-                <div className={option === 'Text' ? `${css.item} ${css.selectedTool}` : css.item}
-                     onMouseEnter={() => handleEnter('Text')}
-                     onMouseLeave={handleLeave}
-                     onClick={() => {
-                         setOption('Text')
-                         handleOpenPopUp('Text')
-                     }}>
-                    {caption === 'Text' && open === '' &&
-                        <CaptionOnHover text={'Text'} short={"T"}/>
-                    }
-                    <BiText/>
-                </div>
-                <div className={option === 'Shape' ? `${css.item} ${css.selectedTool}` : css.item}
-                     onMouseEnter={() => handleEnter('Shape')}
-                     onMouseLeave={handleLeave}
-                     onClick={() => {
-                         setOption("Shape")
-                         handleOpenPopUp('Shape')
-                     }}>
-                    {caption === 'Shape' && open === '' &&
-                        <CaptionOnHover text={'Shape'} short={"S"}/>
-                    }
-                    <MdOutlineRectangle/>
-                </div>
-                <div className={option === 'Curve' ? `${css.item} ${css.selectedTool}` : css.item}
-                     onMouseEnter={() => handleEnter('Curve')}
-                     onMouseLeave={handleLeave}
-                     onClick={() => {
-                         setOption('Curve')
-                         setOpen('')
-                     }}>
-                    {caption === 'Curve' && open === '' &&
-                        <CaptionOnHover text={'Connection Line'} short={"C"}/>
-                    }
-                    <HiArrowNarrowUp/>
-                </div>
-
-
-                <div>
-                    {open === 'Shape' &&
-                        <ChoseShapePopUp setShape={setShape} setOpen={() => handleOpenPopUp('Shape')}/>
-
-                    }
-                    {open === 'Drawing' &&
-                        <DrawingPopUp cancelStopPropagationRef={popUps} close={() => handleOpenPopUp('Drawing')}/>
-
-                    }
-
-                </div>
-
-
-            </div>
-
-            <div className={`${css.bottomSection} rad-shadow`}
-                 ref={bottomRef}
             >
-                <div className={css.item}
-                     onMouseEnter={() => handleEnter('Forward')}
-                     onMouseLeave={handleLeave}
-                     onClick={(e) => {
-                         e.preventDefault()
-                         setOption("Selection")
-                         dispatch(ActionCreators.redo())
-                         setOpen('')
-                     }}>
-                    {caption === 'Forward' && open === '' &&
-                        <CaptionOnHover text={'Forward'} short={"Cntrl + Shift + Z"}/>
-                    }
-                    <IoReturnUpForwardOutline/>
+                <div className={`${css.toolBar} rad-shadow`}
+                     ref={toolbarRef} id={'sidebar'}
+                     onKeyDown={handleKeyDown}>
+                    <div className={option === 'Selection' ? `${css.item} ${css.selectedTool}` : css.item}
+                         onMouseEnter={() => handleEnter('Selection')}
+                         onMouseLeave={handleLeave}
+                         onClick={() => {
+                             if (option === 'Selection') {
+                                 setOption('Move')
+                             } else {
+                                 setOption('Selection')
+                             }
+                             setOpen('')
+                         }}>
+                        {caption === 'Selection' && open === '' &&
+                            <CaptionOnHover text={'Select'} short={"V, alt + A"}/>
+                        }
+                        <LuMousePointer2/>
+                    </div>
+                    <div className={option === 'Drawing' ? `${css.item} ${css.selectedTool}` : css.item}
+                         onMouseEnter={() => handleEnter('Drawing')}
+                         onMouseLeave={handleLeave}
+                         onClick={() => {
+                             setOption('Drawing')
+                             handleOpenPopUp('Drawing')
+                         }}>
+                        {caption === 'Drawing' && open === '' &&
+                            <CaptionOnHover text={'Draw'} short={"D"}/>
+                        }
+                        <BsPen/>
+                    </div>
+                    <div className={option === 'Text' ? `${css.item} ${css.selectedTool}` : css.item}
+                         onMouseEnter={() => handleEnter('Text')}
+                         onMouseLeave={handleLeave}
+                         onClick={() => {
+                             setOption('Text')
+                             handleOpenPopUp('Text')
+                         }}>
+                        {caption === 'Text' && open === '' &&
+                            <CaptionOnHover text={'Text'} short={"T"}/>
+                        }
+                        <BiText/>
+                    </div>
+                    <div className={option === 'Shape' ? `${css.item} ${css.selectedTool}` : css.item}
+                         onMouseEnter={() => handleEnter('Shape')}
+                         onMouseLeave={handleLeave}
+                         onClick={() => {
+                             setOption("Shape")
+                             handleOpenPopUp('Shape')
+                         }}>
+                        {caption === 'Shape' && open === '' &&
+                            <CaptionOnHover text={'Shape'} short={"S"}/>
+                        }
+                        <MdOutlineRectangle/>
+                    </div>
+                    <div className={option === 'Curve' ? `${css.item} ${css.selectedTool}` : css.item}
+                         onMouseEnter={() => handleEnter('Curve')}
+                         onMouseLeave={handleLeave}
+                         onClick={() => {
+                             setOption('Curve')
+                             setOpen('')
+                         }}>
+                        {caption === 'Curve' && open === '' &&
+                            <CaptionOnHover text={'Connection Line'} short={"C"}/>
+                        }
+                        <HiArrowNarrowUp/>
+                    </div>
+
+
+                    <div>
+                        {open === 'Shape' &&
+                            <ChoseShapePopUp setShape={setShape} setOpen={() => handleOpenPopUp('Shape')}/>
+
+                        }
+                        {open === 'Drawing' &&
+                            <DrawingPopUp
+                                cancelStopPropagationRef={popUps}
+                                selected={selected}
+                                setSelected={setSelected}
+                                close={() => handleOpenPopUp('Drawing')}/>
+
+                        }
+
+                    </div>
+
 
                 </div>
-                <div className={css.item}
-                     onMouseEnter={() => handleEnter('Back')}
-                     onMouseLeave={handleLeave}
-                     onClick={(e) => {
-                         e.preventDefault()
-                         setOption("Selection")
-                         dispatch(ActionCreators.undo())
-                         setOpen('')
-                     }}>
-                    {caption === 'Back' && open === '' &&
-                        <CaptionOnHover text={'Back'} short={"Cntrl + Z"}/>
-                    }
-                    <IoReturnDownBack/>
+
+                <div className={`${css.bottomSection} rad-shadow`}
+                     ref={bottomRef}
+                >
+                    <div className={css.item}
+                         onMouseEnter={() => handleEnter('Forward')}
+                         onMouseLeave={handleLeave}
+                         onClick={(e) => {
+                             e.preventDefault()
+                             setOption("Selection")
+                             dispatch(ActionCreators.redo())
+                             setOpen('')
+                         }}>
+                        {caption === 'Forward' && open === '' &&
+                            <CaptionOnHover text={'Forward'} short={"Cntrl + Shift + Z"}/>
+                        }
+                        <IoReturnUpForwardOutline/>
+
+                    </div>
+                    <div className={css.item}
+                         onMouseEnter={() => handleEnter('Back')}
+                         onMouseLeave={handleLeave}
+                         onClick={(e) => {
+                             e.preventDefault()
+                             setOption("Selection")
+                             dispatch(ActionCreators.undo())
+                             setOpen('')
+                         }}>
+                        {caption === 'Back' && open === '' &&
+                            <CaptionOnHover text={'Back'} short={"Cntrl + Z"}/>
+                        }
+                        <IoReturnDownBack/>
+
+                    </div>
 
                 </div>
-
             </div>
-        </div>
+        </>
     )
-}
+})
 
 
 export default SideBar

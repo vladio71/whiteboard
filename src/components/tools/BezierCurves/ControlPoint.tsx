@@ -15,7 +15,9 @@ const ControlPoint = ({point,ref,handleMouseDown, additional}) => {
 
     let style = {
         left: (point.x )*common.scale-5,
-        top: (point.y)*common.scale-5
+        top: (point.y)*common.scale-5,
+        zIndex: 20
+
     }
 
     return (

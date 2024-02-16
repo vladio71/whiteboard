@@ -4,6 +4,7 @@ import {removeDrawing, updateDrawing} from "../../../redux/Slices/drawingSlice";
 import RemoveObject from "../../layout/utils/RemoveObject";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
 import {setRectPath, setShapeInfo} from "components/tools/Shape/shapes/Rectangle";
+import {drawPoints, getLineWidth, midPointBtw} from "./useDrawing";
 
 
 const DrawingObject = ({drawing, isUsable}) => {
@@ -41,38 +42,31 @@ const DrawingImage = ({object}) => {
         const ctx: CanvasRenderingContext2D = canvas.getContext('2d')
         const scaleX = object.w / object.startW
         const scaleY = object.h / object.startH
-        canvas.width = (object.w + 15) * (common.scale)
-        canvas.height = (object.h + 15) * (common.scale)
+        canvas.width = (object.w + 15) * (common.scale) + 100
+        canvas.height = (object.h + 15) * (common.scale) + 100
 
 
-        var img = new Image;
-        img.src = object.dataUrl;
-
-        console.log(common.theme)
+        ctx.lineJoin = 'round'
+        ctx.lineCap = "round";
 
         if (common.theme === "dark")
             ctx.filter = 'invert(1)'
         ctx.transform(scaleX * (common.scale), 0, 0, scaleY * (common.scale), 0, 0)
 
+        ctx.strokeStyle=object.color
+        ctx.lineWidth = getLineWidth(object.thickness, common.scale)
 
-        if (img.complete) {
-            ctx.drawImage(img, 0, 0)
-        } else {
-            img.onload = function () {
-                ctx.drawImage(img, 0, 0)
-
-            }
-        }
+        drawPoints([...object.points], ctx)
         setRectPath(dispatch, object, "d" + object.id)
 
     }, [object.center.x, object.center.y, object.angle, object.style, object.down, common.scale, common.theme])
 
     const urlImageStyle = {
         position: "absolute",
-        left: (object.x) * common.scale - 10,
-        top: (object.y) * common.scale - 10,
-        width: object.w + 20,
-        height: object.h + 20
+        left: 50,
+        top: 50,
+        // width: object.w + 20,
+        // height: object.h + 20
 
     }
 

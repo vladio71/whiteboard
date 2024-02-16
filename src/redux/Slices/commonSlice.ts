@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit'
-import {addLink, fetchData, getId} from "./shapesSlice";
+import {addLink, fetchData, getId, setWhiteboardData} from "./shapesSlice";
 import {ActionCreators} from 'redux-undo';
 import {auth, getData} from "@/firebase/firebase";
 
@@ -10,6 +10,8 @@ const initialState = {
     w: 0,
     scale: 1,
     fetchStatus: false,
+    isFetchingNow: false,
+    uploadStatus: false,
     isAuthLoading: false,
     boardId: null,
     boardName: null,
@@ -17,8 +19,6 @@ const initialState = {
     cardUrl: null,
     theme: "light"
 }
-
-
 
 
 export const CommonSlice = createSlice({
@@ -55,6 +55,9 @@ export const CommonSlice = createSlice({
         setFetchStatus: (state, action) => {
             state.fetchStatus = action.payload
         },
+        setUploadStatus: (state, action) => {
+            state.uploadStatus = action.payload
+        },
 
 
     },
@@ -71,9 +74,16 @@ export const CommonSlice = createSlice({
                     }
                 }
                 state.fetchStatus = true
+                state.isFetchingNow = false
+            })
+            .addCase(fetchData.pending, (state, action) => {
+                state.isFetchingNow = true
             })
             .addCase('store/reset', () => {
                 return initialState
+            })
+            .addCase(setWhiteboardData.fulfilled, (state) => {
+                state.uploadStatus = true
             })
 
     })

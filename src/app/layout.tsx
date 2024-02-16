@@ -1,9 +1,6 @@
 import './globals.css'
 import {Inter} from 'next/font/google'
-import {Provider} from "react-redux";
-import {PersistGate} from 'redux-persist/integration/react';
 import React from "react";
-import {persistor, store} from "../redux/store";
 import Head from 'next/head'
 import {Providers} from "../components/layout/utils/Providers"
 import {Toaster} from "react-hot-toast";
@@ -44,13 +41,14 @@ export default function RootLayout({
     return (
 
         <html lang="en" suppressHydrationWarning={true}>
-        <Head>
+        {/*<Head>*/}
+        {/*    /!*<script src="http://localhost:8097"></script>*!/*/}
 
-            <title>WhiteBoard</title>
-            <meta name="viewport"
-                  content="user-scalable=no height=device-height, width=device-width,  initial-scale=1"/>
+        {/*    <title>WhiteBoard</title>*/}
+        {/*    <meta name="viewport"*/}
+        {/*          content="user-scalable=no height=device-height, width=device-width,  initial-scale=1"/>*/}
 
-        </Head>
+        {/*</Head>*/}
         <body className={inter.className}>
         <Toaster position="bottom-left"
                  toastOptions={toastOptions}

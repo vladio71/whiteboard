@@ -13,6 +13,8 @@ import {doc, setDoc} from "firebase/firestore";
 import {getAuth} from "@firebase/auth";
 import {errorHandle} from "@/firebase/auth";
 import {toast} from "react-hot-toast";
+import {onAuthStateChanged} from "firebase/auth";
+import {cookies} from "next/headers";
 
 
 const firebaseConfig = {
@@ -29,6 +31,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
+onAuthStateChanged(auth, user => {
+    if (typeof document !== "undefined")
+        if (user) {
+            document.cookie = "authStatus=1; max-age=36000"
+
+        } else {
+            document.cookie = "authStatus=1; max-age=0";
+        }
+})
 
 initializeFirestore(app, {
     ignoreUndefinedProperties: true,
@@ -37,14 +48,15 @@ initializeFirestore(app, {
 export const db = getFirestore(app);
 
 
-
-
-
-export async function addNewBoard(userId) {
-    const docRef = await addDoc(collection(db, userId), {
-        isEmpty: true
-    });
+export async function addNewBoard(userId, data) {
+    const docRef = await addDoc(collection(db, userId), data);
     return docRef.id
+}
+
+export async function isDocumentIsEmpty(userId) {
+
+    const docSnap = await getDocs(collection(db, userId))
+    return docSnap.empty
 }
 
 export async function updateBoard(boardId, data) {
@@ -70,13 +82,16 @@ export async function deleteBoard(boardId) {
 }
 
 export async function setAllData(data, userId, boardId) {
-    toast.loading('', {
-        style: {
-            maxWidth: "40px"
-        }
-    });
-    const response = await setDoc(doc(db, userId, boardId), data)
-    return response
+    if (userId) {
+        toast.loading('', {
+            style: {
+                maxWidth: "40px"
+            }
+        });
+        const response = await setDoc(doc(db, userId, boardId), data)
+        return response
+    }
+
 
 }
 
@@ -89,8 +104,10 @@ export async function getData(userId, boardId) {
 
 export async function getUserBoards(callback) {
     try {
+
         if (auth.currentUser?.uid) {
             const querySnapshot = await getDocs(collection(db, auth.currentUser?.uid));
+
             if (querySnapshot) {
                 callback(querySnapshot.docs.map(el => {
                     return {

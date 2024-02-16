@@ -1,8 +1,11 @@
 
 .container {
     position: fixed;
-    bottom: 7.5rem;
-    right: 16rem;
+    bottom: 1.5rem;
+    width: 270px;
+    height: 50px;
+    right: 4.5rem;
+    z-index: 100;
 }
 
 .flexZoom {

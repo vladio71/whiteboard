@@ -58,7 +58,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
 
 
     useEffect(() => {
-        setObject({...editorObject, angle: object.angle})
+        // setObject({...editorObject, angle: object.angle}) // here is the gem
     }, [editorObject.x, editorObject.y, editorObject.w, editorObject.h, editorObject?.shape])
 
     useEffect(() => {
@@ -104,14 +104,13 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
         const clientY = (e.clientY + common.scrollY) / common.scale
 
         if (direction !== "") {
-            if (direction !== "rotate")
-                setToggle(!toggle)
             setObject(prev => {
 
                 switch (direction) {
                     case "bottom":
                         if (clientY <= object.y) {
                             setDirection("top")
+                            setToggle(!toggle)
                             return {
                                 ...object,
                                 y: clientY,
@@ -154,7 +153,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
                             w: (leftEdge - clientX),
                         }
                     case "right":
-                        if (object.x + object.w <= edge) {
+                        if (clientX <= object.x) {
                             setDirection("left")
                             setToggle(!toggle)
                             return {
@@ -169,7 +168,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
                             w: (clientX - object.x),
                         }
                     case "rt":
-                        if (clientY >= topEdge || object.x + object.w <= edge) {
+                        if (clientY >= topEdge || clientX <= object.x) {
                             return handleReverseRt(clientX, clientY, object)
                         }
                         return {
@@ -180,7 +179,6 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
                         }
                     case "lt":
                         if (clientY >= object.h + object.y || clientX >= leftEdge) {
-
                             return handleReverseLt(clientX, clientY, object)
                         }
                         return {
@@ -241,10 +239,10 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
             const d = {x: clientX * common.scale - start.x, y: clientY * common.scale - start.y}
             setObject({
                 ...object,
-                x: editorObject.x + d.x / common.scale,
-                y: editorObject.y + d.y / common.scale,
+                x: object.x + d.x / common.scale,
+                y: object.y + d.y / common.scale,
             })
-            setToggle(!toggle)
+            // setToggle(!toggle)
         }
 
     }
@@ -332,14 +330,18 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
         }
     }
 
-    function handleMouseUp(e) {
-        if (!down) return
+    async function handleMouseUp(e) {
         setDown(false)
-        setToggle(!toggle)
+        // setToggle(!toggle)
         setDirection('')
-        if (object) {
-            saveChanges(object)
-        }
+        setObject(prev => {
+            saveChanges(prev)
+            return prev
+        })
+
+         // if (object) {
+        //     saveChanges(object)
+        // }
     }
 
     const handleClearDir = () => {
@@ -374,7 +376,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
         setEditMode(false)
         level?.setOption("Curve")
         level?.setStart({x: (x + common.scrollX) / common.scale, y: (y + common.scrollY) / common.scale})
-        if (editorObject?.dataUrl) {
+        if (editorObject?.drawing) {
             level?.setShapeId("d" + editorObject.id)
         } else if (editorObject?.shape) {
             level?.setShapeId(editorObject.id)

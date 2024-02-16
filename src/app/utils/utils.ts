@@ -19,13 +19,13 @@ export function ThrottledDebounce(fn, threshold) {
     threshold = threshold || 10;
     var last, deferTimer;
 
-    var db = debounce(fn,0)
-    return function() {
+    var db = debounce(fn, 0)
+    return function () {
         var now = +new Date, args = arguments;
-        if(!last || (last && now < last + threshold)) {
+        if (!last || (last && now < last + threshold)) {
             clearTimeout(deferTimer);
             db.apply(this, args);
-            deferTimer = setTimeout(function() {
+            deferTimer = setTimeout(function () {
                 last = now;
                 fn.apply(this, args);
             }, threshold);
@@ -38,7 +38,7 @@ export function ThrottledDebounce(fn, threshold) {
 
 
 
-export function preventTools(e){
+export function preventTools(e) {
     e.stopPropagation()
 }
 

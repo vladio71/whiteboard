@@ -47,18 +47,19 @@ const EditingPopUp = ({id, item}) => {
             </div>
             <div className={css.contentBox}>
 
-                <FontColorPopUp
-                    id={id}
-                    addStyle={addStyle}
-                    selected={selectedPopUp}
-                    handlePopUp={handlePopUp}/>
+
+                    <FontColorPopUp
+                        id={id}
+                        addStyle={addStyle}
+                        selected={selectedPopUp}
+                        handlePopUp={handlePopUp}/>
 
                 {/*<span onClick={() => handlePopUp('fontColor')} className={css.fontColor}>A</span>*/}
                 {/*{selectedPopUp === 'fontColor' &&*/}
                 {/* }*/}
                 <span onClick={() => handlePopUp('textEdit')} className={css.textEdit}>B</span>
                 {selectedPopUp === 'textEdit' &&
-                <TextEditPopUp id={id} close={() => handlePopUp('textEdit')}/>
+                    <TextEditPopUp id={id} close={() => handlePopUp('textEdit')}/>
                 }
 
 
@@ -67,14 +68,14 @@ const EditingPopUp = ({id, item}) => {
             <div className={`${css.contentBox} ${css.end}`}>
                 <div onClick={() => handlePopUp('border')} className={css.borderedCircle}>
                     {selectedPopUp === 'border' &&
-                    <BorderPopUp id={id}/>
+                        <BorderPopUp id={id}/>
                     }
                 </div>
 
-                <div id={'color'} onClick={() => handlePopUp('color')}>
+                <div id={'color'} onClick={() => handlePopUp('color')} className={css.borderedCircle}>
                     <ColoredCircle color={'white'}/>
                     {selectedPopUp === 'color' &&
-                    <BackgroundPopUp id={id} addStyle={addStyle}/>
+                        <BackgroundPopUp id={id} addStyle={addStyle}/>
                     }
                 </div>
 

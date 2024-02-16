@@ -12,7 +12,7 @@ const Circle = ({item}) => {
                     p3.arc(item.x + item.w / 2, item.y + item.w / 2, Math.abs((item.w / 2) - 30), 0, 2 * Math.PI);
                 }}
                 drawShapeFunction={(ctx) => {
-                    ctx.arc(item.x + item.w / 2, item.y + item.w / 2, Math.abs(item.w / 2), 0, 2 * Math.PI);
+                    ctx.arc( 100+item.w / 2, 100+item.w / 2, Math.abs(item.w / 2), 0, 2 * Math.PI);
                 }}
 
             />

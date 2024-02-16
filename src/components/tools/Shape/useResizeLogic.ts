@@ -18,7 +18,8 @@ export function useResizeLogic(handleDown, handleUp, handleMove, down, toggle = 
             window.removeEventListener('mousedown', handleDown)
             window.removeEventListener('mouseup', handleUp)
         }
-    }, [down, toggle, isUsable])
+    // }, [down, toggle, isUsable])
+    }, [down, isUsable])
 
 }
 

@@ -5,7 +5,7 @@ import {
 } from "firebase/auth";
 import {auth} from './firebase'
 import {toast} from "react-hot-toast";
-import {deleteUser} from "@firebase/auth";
+import {deleteUser, signInAnonymously} from "@firebase/auth";
 
 
 const GoogleProvider = new GoogleAuthProvider();
@@ -22,6 +22,7 @@ export async function signInWithGoogle() {
     return await signInWithPopup(auth, GoogleProvider)
         .catch((error) => errorHandle(error));
 }
+
 
 
 export async function createNewUser(email, password) {

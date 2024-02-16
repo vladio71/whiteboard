@@ -46,7 +46,7 @@ const ContainerResizeComponent =
         const child = useRef()
         const overlay = useRef()
         const editCurveStatus = useAppSelector(state => state.present.curve.status)
-        const level = useContext(LevelContext)
+        const common = useAppSelector(state => state.present.common)
 
 
         const {
@@ -73,14 +73,17 @@ const ContainerResizeComponent =
             if (isUsable === "Selection") {
                 if (down) {
                     window.addEventListener('mousemove', handleMouseMove)
+                    window.addEventListener('mouseup', handleMouseUp)
                 }
-                window.addEventListener('mouseup', handleMouseUp)
+
             }
             return () => {
                 window.removeEventListener('mousemove', handleMouseMove)
                 window.removeEventListener('mouseup', handleMouseUp)
             }
         }, [down, toggle, isUsable])
+
+        // }, [down, isUsable])
 
         function handleEnterCurve(e) {
             overlay.current.style.background = "rgba(128, 128, 128, 0.1)"
@@ -110,93 +113,90 @@ const ContainerResizeComponent =
                 setEditMode(true)
         }
 
-//DELETE CONTEXT
+        const PositionStyle = {
+            position: "absolute",
+            width: `${object.w+200}px`,
+            height: `${object.h+200}px`,
+            transform: `translate(${(object.x) * common.scale - 100}px,${(object.y) * common.scale - 100}px) rotate(${object.angle * Math.PI / 180}rad)`,
+            transformOrigin: "center"
+        }
         return (
 
-                <div ref={container}>
-                    <div style={TextStyle}
-                         ref={overlay}
-                         onMouseDown={handleMouseDown}
-                         onClick={handleEditMode}
-                    >
-                        <div className={css.hoverContainer}
-                             onMouseOver={editCurveStatus ? handleEnterCurve : undefined}
-                             onMouseOut={handleLeaveCurve}
-                             style={overlayStyle}
-                        />
-                        {editorObject?.link &&
-                            <a href={editorObject.link} target={'_blank'}>
-                                <div className={css.link} style={linkStyle}/>
-                            </a>
-                        }
-                        {editMode &&
-                            <>
-                                <div onMouseDown={(e) => e.stopPropagation()}>
-                                    <div className={`${css.curveControl} ${css.top}`} onClick={addCurve}/>
-                                    <div className={`${css.curveControl} ${css.right}`} onClick={addCurve}/>
-                                    <div className={`${css.curveControl} ${css.left}`} onClick={addCurve}/>
-                                    <div className={`${css.curveControl} ${css.bottom}`} onClick={addCurve}/>
-                                </div>
-                                <div className={'lt'} style={controlStyle}
-                                     onMouseOver={() => handleMouseOver("lt")}
-                                     onMouseLeave={handleClearDir}
-                                />
-                                <div className={'rt'} style={controlStyle}
-                                     onMouseOver={() => handleMouseOver("rt")}
-                                     onMouseLeave={handleClearDir}
-                                />
-                                <div className={'bl'} style={controlStyle}
-                                     onMouseOver={() => handleMouseOver("bl")}
-                                     onMouseLeave={handleClearDir}
-                                />
-                                <div className={'br'} style={controlStyle}
-                                     onMouseOver={() => handleMouseOver("br")}
-                                     onMouseLeave={handleClearDir}
-                                />
-                                <div className={'left'}
-                                     onMouseOver={() => handleMouseOver("left")}
-                                     onMouseLeave={handleClearDir}
-                                />
-                                <div className={'right'}
-                                     onMouseOver={() => handleMouseOver("right")}
-                                     onMouseLeave={handleClearDir}
-                                />
-                                <div className={'rotate'}
-                                     onMouseOver={() => handleMouseOver("rotate")}
-                                     onMouseLeave={handleClearDir}
-                                >
-                                    <GrRotateRight/>
-                                </div>
-                                {object?.shape !== "Circle" &&
-                                    <>
-                                        <div className={'top'}
-                                             onMouseOver={() => handleMouseOver("top")}
-                                             onMouseLeave={handleClearDir}
-                                        />
-                                        <div className={'bottom'}
-                                             onMouseOver={() => handleMouseOver("bottom")}
-                                             onMouseLeave={handleClearDir}
-                                        />
-                                    </>
-                                }
-                            </>
-                        }
-                        <SelectedFrame isSelected={editorObject?.selected || false} object={object}>
-                            <div ref={child}>
-                                <div onMouseDown={e => e.stopPropagation()}>
-                                    {popUp && editMode && !down &&
-                                        // {popUp && editMode &&
-                                        popUp({
-                                            ...object,
-                                            center,
-                                            category: 'object',
-                                            down,
-                                            editMode
-                                        })
-                                    }
-                                </div>
-                                {renderEditor &&
-                                    renderEditor({
+            <div ref={container}>
+                <div style={TextStyle}
+                     ref={overlay}
+                     onMouseDown={handleMouseDown}
+                    // onMouseUp={handleMouseUp}
+                     onClick={handleEditMode}
+                >
+                    <div className={css.hoverContainer}
+                         onMouseOver={editCurveStatus ? handleEnterCurve : undefined}
+                         onMouseOut={handleLeaveCurve}
+                         style={overlayStyle}
+                    />
+                    {editorObject?.link &&
+                        <a href={editorObject.link} target={'_blank'}>
+                            <div className={css.link} style={linkStyle}/>
+                        </a>
+                    }
+                    {editMode &&
+                        <>
+                            <div onMouseDown={(e) => e.stopPropagation()}>
+                                <div className={`${css.curveControl} ${css.top}`} onClick={addCurve}/>
+                                <div className={`${css.curveControl} ${css.right}`} onClick={addCurve}/>
+                                <div className={`${css.curveControl} ${css.left}`} onClick={addCurve}/>
+                                <div className={`${css.curveControl} ${css.bottom}`} onClick={addCurve}/>
+                            </div>
+                            <div className={'lt'} style={controlStyle}
+                                 onMouseOver={() => handleMouseOver("lt")}
+                                 onMouseLeave={handleClearDir}
+                            />
+                            <div className={'rt'} style={controlStyle}
+                                 onMouseOver={() => handleMouseOver("rt")}
+                                 onMouseLeave={handleClearDir}
+                            />
+                            <div className={'bl'} style={controlStyle}
+                                 onMouseOver={() => handleMouseOver("bl")}
+                                 onMouseLeave={handleClearDir}
+                            />
+                            <div className={'br'} style={controlStyle}
+                                 onMouseOver={() => handleMouseOver("br")}
+                                 onMouseLeave={handleClearDir}
+                            />
+                            <div className={'left'}
+                                 onMouseOver={() => handleMouseOver("left")}
+                                 onMouseLeave={handleClearDir}
+                            />
+                            <div className={'right'}
+                                 onMouseOver={() => handleMouseOver("right")}
+                                 onMouseLeave={handleClearDir}
+                            />
+                            <div className={'rotate'}
+                                 onMouseOver={() => handleMouseOver("rotate")}
+                                 onMouseLeave={handleClearDir}
+                            >
+                                <GrRotateRight/>
+                            </div>
+                            {object?.shape !== "Circle" &&
+                                <>
+                                    <div className={'top'}
+                                         onMouseOver={() => handleMouseOver("top")}
+                                         onMouseLeave={handleClearDir}
+                                    />
+                                    <div className={'bottom'}
+                                         onMouseOver={() => handleMouseOver("bottom")}
+                                         onMouseLeave={handleClearDir}
+                                    />
+                                </>
+                            }
+                        </>
+                    }
+                    <SelectedFrame isSelected={editorObject?.selected || false} object={object}>
+                        <div ref={child}>
+                            <div onMouseDown={e => e.stopPropagation()}>
+                                {popUp && editMode && !down &&
+                                    // {popUp && editMode &&
+                                    popUp({
                                         ...object,
                                         center,
                                         category: 'object',
@@ -204,24 +204,34 @@ const ContainerResizeComponent =
                                         editMode
                                     })
                                 }
-                                {children}
                             </div>
-                        </SelectedFrame>
-                    </div>
-
-                    <div>
-                        {renderProp &&
-                            renderProp({
-                                ...object,
-                                center,
-                                category: 'object',
-                                down,
-                                editMode
-                            })
-                        }
-                    </div>
-
+                            {renderEditor &&
+                                renderEditor({
+                                    ...object,
+                                    center,
+                                    category: 'object',
+                                    down,
+                                    editMode
+                                })
+                            }
+                            {children}
+                        </div>
+                    </SelectedFrame>
                 </div>
+
+                <div style={PositionStyle}>
+                    {renderProp &&
+                        renderProp({
+                            ...object,
+                            center,
+                            category: 'object',
+                            down,
+                            editMode
+                        })
+                    }
+                </div>
+
+            </div>
 
         )
 

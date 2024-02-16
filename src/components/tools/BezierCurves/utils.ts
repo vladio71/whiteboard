@@ -136,6 +136,7 @@ export function AlignCurveToNearestPoint(p, ctx, scale, last) {
 export function AlignPointToObjectBorder(p, ctx, clientX, clientY) {
     let posX = clientX
     let posY = clientY
+
     for (let i = 1; i < 15; i++) {
         if (ctx.isPointInStroke(p.p, posX + i, posY)) {
             return [getAdditionalPoint({x: posX + i, y: posY}, p.center), {x: posX + i, y: posY}]
@@ -191,26 +192,28 @@ export function drawArrow(ctx, angle, point) {
     ctx.restore();
 }
 
-export function drawHightOrderCurve(points, ctx, borders, common, style) {
+export function getCurveArrowAngle(points, borders, common, style) {
 
-     const cur = new Path2D()
+    // const cur = new Path2D()
 
     const pointsForRender = getPoints(points).map(p => {
         return {
-            x: (p.x - borders.minX) * common.scale + 200,
-            y: (p.y - borders.minY) * common.scale + 200
+            // x: (p.x - borders.minX) * common.scale + 200,
+            // y: (p.y - borders.minY) * common.scale + 200
+            x: p.x - (borders.minX) * common.scale + 200,
+            y: p.y - (borders.minY) * common.scale + 200
         }
     })
-    if (style?.line) {
-        if (style.line < 2) {
-
-            ctx.setLineDash([5, 15]);
-        } else {
-            ctx.setLineDash([3, 3]);
-
-        }
-    }
-    ctx.lineWidth = style?.thickness * 30 / 3 < 1 ? 1 : style?.thickness * 30 / 3
+    // if (style?.line) {
+    //     if (style.line < 2) {
+    //
+    //         ctx.setLineDash([5, 15]);
+    //     } else {
+    //         ctx.setLineDash([3, 3]);
+    //
+    //     }
+    // }
+    // ctx.lineWidth = style?.thickness * 30 / 3 < 1 ? 1 : style?.thickness * 30 / 3
 
     const tStart = bezier(0.98, pointsForRender)
     const dx = pointsForRender[points.length - 1].x - tStart.x;
@@ -218,14 +221,14 @@ export function drawHightOrderCurve(points, ctx, borders, common, style) {
     const endingAngle = Math.atan2(dy, dx);
 
 
-    makeHightOrderCurvePath(cur, pointsForRender)
-    if (common.theme === "dark")
-        ctx.filter = 'invert(1)'
-
-    ctx.stroke(cur)
-    drawArrow(ctx, endingAngle, pointsForRender[pointsForRender.length - 1])
+    // makeHightOrderCurvePath(cur, pointsForRender)
+    // if (common.theme === "dark")
+    //     ctx.filter = 'invert(1)'
+    //
+    // // ctx.stroke(cur)
+    // drawArrow(ctx, endingAngle, pointsForRender[pointsForRender.length - 1])
     return {
-        cur,
+        // cur,
         endingAngle
     }
 

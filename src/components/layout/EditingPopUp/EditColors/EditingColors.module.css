@@ -49,32 +49,35 @@
     height: 350px;
     /*box-shadow: 0px 0px 5px 3px rgba(50, 50, 56, 0.16);*/
     position: absolute;
-    top: 3.6rem;
-    left: -1rem;
+    /*bottom: 0;*/
+    /*transform: translate(-20%, 100%);*/
+    /*left: -1rem;*/
     background: var(--surface2);
     border-radius: 5px;
     overflow: auto;
     z-index: 100;
-    animation: .1s linear 0s scale;
+    /*animation: .1s linear 0s scale;*/
 }
 
 
 @keyframes scale {
-    from {
-        transform: scale(.8);
-    }
-    to {
-        transform: scale(1);
-    }
+    /*from {*/
+    /*    transform: scale(.8) translate(-20%, 100%);*/
+    /*}*/
+    /*to {*/
+    /*    transform: scale(1) translate(-20%, 100%);*/
+    /*}*/
 }
 
 
 .colorBox {
-    margin: 1rem 1.2rem;
+    margin: .8rem auto;
     display: flex;
     flex-wrap: wrap;
-    gap: .5rem;
-    height: 40%;
+    max-width: 150px;
+    justify-content: space-around;
+    gap: .4rem;
+    height: fit-content;
 }
 
 .coloredCircle {
@@ -151,35 +154,35 @@
 }
 
 .spaceForBorder {
-    display: inline-block;
     width: 33%;
     height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .displayInlineBlock {
     width: 100%;
     display: block;
     height: 3px;
-    margin: 5px;
 }
 
 .border {
     display: inline-block;
-    width: 2rem;
 }
 
 .dashedWithSoul {
-    background-image: linear-gradient(to right, #000000 33%, var(--text1) 0%);
-    background-position: bottom;
-    background-size: 5px 4px;
+    background-image: linear-gradient(to right, #000000 50%, white 50%);
+    position: relative;
+    top: 0;
+    background-position: 0px 0px;
+    background-size: 6px 6px;
     background-repeat: repeat-x;
-    margin-bottom: 8px;
 }
 
 .colorPicker {
     z-index: 100;
-    position: absolute;
-    left: 190px;
-    top: 3.6rem;
+    position: relative;
+    /*left: 105%;*/
 
 }

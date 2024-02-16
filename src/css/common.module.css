@@ -52,7 +52,9 @@
     color: var(--text1);
     background: var(--surface3);
     transition: .2s;
+    font-size: 1rem
 }
+
 
 
 .button:hover {

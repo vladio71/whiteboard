@@ -29,7 +29,7 @@ const CurvePopUp = ({curve}) => {
              }}>
 
             <div className={css.contentBox}>
-                <div id={'color'} onClick={() => handlePopUp('color')}>
+                <div id={'color'} onClick={() => handlePopUp('color')} className={css.borderedCircle}>
                     <ColoredCircle color={'white'}/>
                     {selectedPopUp === 'color' &&
                     <BackgroundPopUp id={curve.id} category={'curves'} addStyle={addStyle}/>

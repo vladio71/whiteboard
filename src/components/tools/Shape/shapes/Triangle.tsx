@@ -30,8 +30,13 @@ const Triangle = ({item}) => {
                     })
 
                 }}
-                drawShapeFunction={(ctx) => {
-                    drawTriangle(ctx, item)
+                drawShapeFunction={(ctx,scale) => {
+                    drawTriangle(ctx, {
+                        x: 100/scale,
+                        y: 100/scale,
+                        w: item.w,
+                        h: item.h
+                    })
                 }}
             />
         </>

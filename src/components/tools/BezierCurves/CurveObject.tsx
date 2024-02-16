@@ -1,5 +1,4 @@
 import React, {useEffect, useRef, useState} from "react";
-import {useCanvas} from "../Shape/shapes/useCanvas";
 import css from '../../../css/curves.module.css'
 import {useResizeLogic} from "../Shape/useResizeLogic";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
@@ -9,24 +8,35 @@ import {useCurve} from "./useCurve";
 import CurvePopUp from "./CurvePopUp/CurvePopUp";
 import {selectStyles} from "../../../redux/Slices/shapesSlice";
 import RemoveObject from "../../layout/utils/RemoveObject";
-import {drawArrow, getDefaultBezierControlPoints, makeHightOrderCurvePath} from "./utils";
+import {drawArrow, getDefaultBezierControlPoints, getPoints, makeHightOrderCurvePath} from "./utils";
+import {checkForBorders} from "../Drawing/useDrawing";
+import PositionCanvasCurve from "./PositionCanvasCurve";
+import useRefState from "../../../app/hooks/useRefState";
 
-const CurveObject = ({curve, isUsable, handleTop, handleBottom}) => {
 
+const CurveObject = ({
+    curve,
+    isUsable,
+    handleTop,
+    handleBottom
+}) => {
 
-    const [sample, setSample] = useState(curve)
+    const [update, setUpdate] = useState(false)
+    const [sample, setSample] = useRefState(curve)
     const [borders, setBorders] = useState({maxX: 0, maxY: 0, minX: 0, minY: 0})
     const container = useRef()
-    const style = useAppSelector(state => selectStyles(state, curve.id, "curves"))
+    const ref = useRef()
     const common = useAppSelector(state => state.present.common)
 
 
     useEffect(() => {
         setSample({
-            ...sample,
-            points: curve.points
+            ...sample.current,
+            points: curve.points,
+            style: curve.style
         })
-    }, [curve.points])
+        setUpdate(!update)
+    }, [curve.points, curve.style])
 
 
     const styleContainer = {
@@ -34,6 +44,7 @@ const CurveObject = ({curve, isUsable, handleTop, handleBottom}) => {
         top: `${borders.minY * common.scale}px`,
         width: `${Math.abs(borders.maxX - borders.minX) * common.scale}px`,
         height: `${Math.abs(borders.maxY - borders.minY) * common.scale}px`,
+        zIndex: 15
     }
     const selectedStyle = {
         left: -10,
@@ -46,69 +57,6 @@ const CurveObject = ({curve, isUsable, handleTop, handleBottom}) => {
     }
 
 
-    function draw(c, ctx, end = null) {
-        if (style?.line) {
-            if (style.line < 2) {
-
-                ctx.setLineDash([5, 15]);
-            } else {
-                ctx.setLineDash([3, 3]);
-
-            }
-        }
-        ctx.strokeStyle = style?.background
-        ctx.fillStyle = style?.background
-        const cur = new Path2D()
-        const pointsForRender = getPoints(c.points).map((p, id) => {
-            return {
-                x: (p.x - borders.minX) * common.scale + 200,
-                y: (p.y - borders.minY) * common.scale + 200
-            }
-        })
-        if (pointsForRender.length === 2) {
-            const {
-                cp1,
-                cp2
-            } = getDefaultBezierControlPoints(pointsForRender[0], pointsForRender[pointsForRender.length - 1])
-            pointsForRender.splice(1, 0, cp1, cp2)
-        }
-        makeHightOrderCurvePath(cur, pointsForRender)
-        if (common.theme === "dark")
-            ctx.filter = 'invert(1)'
-        ctx.lineWidth = style?.thickness * 30 / 3 < 1 ? 1 : style?.thickness * 30 / 3
-        ctx.stroke(cur)
-        drawArrow(ctx, c.angle, pointsForRender[pointsForRender.length - 1])
-    }
-
-
-    function getBorders(plist) {
-        let pointsList = getPoints(plist)
-        let minX = pointsList[0].x
-        let minY = pointsList[0].y
-        let maxX = pointsList[0].x
-        let maxY = pointsList[0].y
-        pointsList.forEach(p => {
-            if (p.x > maxX)
-                maxX = p.x
-            if (p.y > maxY)
-                maxY = p.y
-            if (p.x < minX)
-                minX = p.x
-            if (p.y < minY)
-                minY = p.y
-        })
-        setBorders({maxX, maxY, minX, minY})
-        return {
-            x: minX - 10,
-            y: minY - 10,
-            w: Math.abs(maxX - minX) + 20,
-            h: Math.abs(maxY - minY) + 20
-        }
-
-    }
-
-
-    const ref = useCanvas(draw.bind(null, sample), borders)
     const {
         additionalPoints,
         plist,
@@ -126,9 +74,7 @@ const CurveObject = ({curve, isUsable, handleTop, handleBottom}) => {
         ref,
         sample,
         setSample,
-        draw,
         container,
-        getBorders,
         isUsable,
         handleTop,
         borders,
@@ -139,12 +85,9 @@ const CurveObject = ({curve, isUsable, handleTop, handleBottom}) => {
     useResizeLogic(() => {
     }, handleUp, handleMove, down, toggle, isUsable)
 
-
     useEffect(() => {
-        if (plist.length > 0) {
-            getBorders(plist.concat(additionalPoints))
-        }
-    }, [sample])
+        setBorders(checkForBorders(getPoints(plist.current.concat(additionalPoints))))
+    }, [plist.current])
 
 
     return (
@@ -171,13 +114,13 @@ const CurveObject = ({curve, isUsable, handleTop, handleBottom}) => {
 
                 {(editMode && !down) &&
                     <>
-                        {plist.map((p, i) => {
+                        {plist.current.map((p, i) => {
                             return <ControlPoint key={i} handleMouseDown={() => handleControlPointDown(i, p)}
                                                  point={p}/>
                         })}
 
                         {additionalPoints.map((p, i) => {
-                            if (isAttachedBack && i === 0) {
+                            if (isAttachedBack.current && i === 0) {
                             } else {
                                 return <ControlPoint
                                     key={i}
@@ -190,31 +133,13 @@ const CurveObject = ({curve, isUsable, handleTop, handleBottom}) => {
 
                     </>
                 }
-
-                <PositionCanvas borders={borders} common={common}>
-                    <canvas ref={ref}/>
-                </PositionCanvas>
+                <PositionCanvasCurve sample={sample} canvasRef={ref} down={down} common={common}/>
             </RemoveObject>
         </>
     )
+
 }
 
-const PositionCanvas = ({borders, common, children}) => {
-
-    const PositionStyle = {
-        position: "absolute",
-        top: `${(borders.minY) * common.scale - 200}px`,
-        left: `${(borders.minX) * common.scale - 200}px`
-    }
-
-
-    return (
-        <div style={PositionStyle}>
-            {children}
-        </div>
-
-    )
-}
 
 export default CurveObject
 

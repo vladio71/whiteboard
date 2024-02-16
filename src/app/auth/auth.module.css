@@ -40,6 +40,9 @@
     width: 200px;
     border-radius: 2px;
     margin-left: .5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
     transition: .3s;
     cursor: pointer;
     background: var(--surface4-light);
@@ -82,12 +85,9 @@
     color: white;
 }
 .loadingAnimation{
-    position: absolute;
     display: inline-block;
     width: 7px;
     height: 7px;
-    top: 1rem;
-    right: 2.2rem;
     border-radius: 50%;
     background: #a8a8a8;
     animation: linear 1s loading infinite;

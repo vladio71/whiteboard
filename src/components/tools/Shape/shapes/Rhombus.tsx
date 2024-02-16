@@ -12,6 +12,7 @@ const Rhombus = ({item}) => {
             context.lineTo(item.x, item.y + item.h / 2);
 
     }
+
     return (
         <>
             <ShapeConstructor
@@ -31,8 +32,13 @@ const Rhombus = ({item}) => {
                         h: item.h - 50,
                     })
                 }}
-                drawShapeFunction={(ctx) => {
-                    drawRhombus(ctx, item)
+                drawShapeFunction={(ctx, scale) => {
+                    drawRhombus(ctx, {
+                        x: 100/scale,
+                        y: 100/scale,
+                        w: item.w,
+                        h: item.h
+                    })
                 }}
             />
         </>

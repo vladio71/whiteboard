@@ -6,7 +6,6 @@ import {
     updateHeight,
     updateScale,
     updateScroll,
-    setBoardId,
     selectCommon,
     setFetchStatus
 } from "../../redux/Slices/commonSlice";
@@ -16,8 +15,6 @@ import {setAllData, addNewBoard, auth} from "../../firebase/firebase";
 import {useRouter} from "next/navigation";
 import {clearInterval, clearTimeout, setInterval, setTimeout} from "timers";
 import {debounce} from "app/utils/utils";
-import lifecycle from "page-lifecycle/dist/lifecycle.es5";
-import document from "postcss/lib/document";
 import {store} from "../../redux/store";
 
 
@@ -62,71 +59,75 @@ export const useHome = (boardId) => {
 
 
     useEffect(() => {
-        const x = window.innerWidth
-        const y = window.innerHeight
-        if (userView.current !== null) {
+        if (typeof window !== 'undefined') {
+
+            const x = window.innerWidth
+            const y = window.innerHeight
+            if (userView.current !== null) {
+                setTimeout(() => {
+                    const paths = store.getState().present.shape.paths.slice(0, 10)
+                    console.log(paths)
+                    if (paths.length > 0) {
+                        let path = paths.reduce((a, b) => {
+                            let start = (a.center || a)
+                            console.log({x: (start.x + b.center.x) / 2, y: (start.y + b.center.y) / 2})
+                            return {x: (start.x + b.center.x) / 2, y: (start.y + b.center.y) / 2}
+                        })
+                        if (paths.length === 1)
+                            path = paths[0].center
+                        console.log(path.x - x * .5, path.y - y * .5)
+                        console.log(path)
+                        console.log(x * 1.5, y * 1.5)
+
+                        userView.current.scrollTo(path.x - x * .5, path.y - y * .5)
+                    } else {
+                        userView.current.scrollTo(x * 1.5, y * 1.5)
+                    }
+
+                    setIsReady(true)
+                }, 200)
+
+            }
+
+
             setTimeout(() => {
-                console.log(store.getState().present.shape.paths)
-                const paths = store.getState().present.shape.paths.slice(0, 10)
-                if (paths.length > 0) {
-                    let path = paths.reduce((a, b) => {
-                        let start = (a.center || a)
-                        return {x: (start.x + b.center.x) / 2, y: (start.y + b.center.y) / 2}
-                    })
-                    if (paths.length === 1)
-                        path = paths[0].center
-                    userView.current.scrollTo(path.x - x * .5, path.y - y * .5)
-                } else {
-                    userView.current.scrollTo(x * 1.5, y * 1.5)
-                }
-
-                setIsReady(true)
+                const initaial = fieldRef.current.getBoundingClientRect()
+                setWidth(initaial.width)
+                setHeight(initaial.height)
             }, 200)
+            setScrollLeft(userView.current?.scrollLeft)
+            setScrollTop(userView.current?.scrollTop)
+
+            dispatch(updateScroll({x: userView.current.scrollLeft, y: userView.current.scrollTop}))
+            dispatch(updateHeight({w: userView.current.scrollWidth, h: userView.current.scrollHeight}))
+
+            // if (auth?.currentUser && boardId === "new") {
+            //     addNewBoard(auth.currentUser?.uid).then((id) => {
+            //         dispatch(setBoardId(id))
+            //         router.replace(`/board/${id}`)
+            //         dispatch(setFetchStatus(true))
+            //
+            //     })
+            // }
+
+            intervalRef.current = setInterval(() => {
+                dispatch(setWhiteboardData())
+            }, 30000)
+
+            window.addEventListener('keydown', function (e) {
+                if ((e.ctrlKey || e.metaKey) && (e.which === 61 || e.which === 107 || e.which === 173 || e.which === 109 || e.which === 187 || e.which === 189)) {
+                    e.preventDefault();
+                }
+            }, false);
+
+
+            userView.current.addEventListener('scroll', () => debouncedUpdateScroll.current())
+            window.addEventListener('wheel', (e) => {
+                if (e.ctrlKey)
+                    e.preventDefault()
+            }, {passive: false});
 
         }
-
-
-        setTimeout(() => {
-            const initaial = fieldRef.current.getBoundingClientRect()
-            setWidth(initaial.width)
-            setHeight(initaial.height)
-        }, 200)
-        setScrollLeft(userView.current?.scrollLeft)
-        setScrollTop(userView.current?.scrollTop)
-
-        dispatch(updateScroll({x: userView.current.scrollLeft, y: userView.current.scrollTop}))
-        dispatch(updateHeight({w: userView.current.scrollWidth, h: userView.current.scrollHeight}))
-        if (auth?.currentUser && boardId === "new") {
-            addNewBoard(auth.currentUser?.uid).then((id) => {
-                dispatch(setBoardId(id))
-                router.replace(`/board/${id}`)
-                dispatch(setFetchStatus(true))
-
-            })
-        }
-
-        intervalRef.current = setInterval(() => {
-            dispatch(setWhiteboardData())
-        }, 30000)
-
-        window.addEventListener('keydown', function (e) {
-            if ((e.ctrlKey || e.metaKey) && (e.which === 61 || e.which === 107 || e.which === 173 || e.which === 109 || e.which === 187 || e.which === 189)) {
-                e.preventDefault();
-            }
-        }, false);
-
-
-        userView.current.addEventListener('scroll', () => debouncedUpdateScroll.current())
-        window.addEventListener('wheel', (e) => {
-            if (e.ctrlKey)
-                e.preventDefault()
-        }, {passive: false});
-
-        lifecycle.addEventListener('visibilitychange', function (event) {
-            if (event.originalEvent == 'visibilitychange' && event.newState == 'hidden') {
-                navigator.sendBeacon(url, data);
-            }
-        });
 
         return () => {
             clearInterval(intervalRef.current)
@@ -153,7 +154,7 @@ export const useHome = (boardId) => {
             dispatch(updateScale(scale[zoomId]))
             zoomWithMouseRef.current = false
         } else {
-            mountedRef.current = true
+            setTimeout(() => mountedRef.current = true, 100)
         }
     }, [zoomId])
 
@@ -189,8 +190,11 @@ export const useHome = (boardId) => {
                 zoom(e)
             }
         }, 100, throttleRef.current)
-        window.addEventListener('wheel', throttledZoom, {passive: false});
-        window.addEventListener('keydown', throttledKeyDownZoom, false);
+        if (typeof window !== 'undefined') {
+            window.addEventListener('wheel', throttledZoom, {passive: false});
+            window.addEventListener('keydown', throttledKeyDownZoom, false);
+        }
+
         return () => {
             window.removeEventListener('wheel', throttledZoom)
             window.removeEventListener('keydown', throttledKeyDownZoom);

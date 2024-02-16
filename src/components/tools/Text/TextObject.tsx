@@ -21,6 +21,8 @@ const TextObject = ({text, isUsable}) => {
 
     return (
         <RemoveObject key={text.id} removeFunc={removeText} id={text.id}>
+
+
             <ContainerResizeComponent
                 id={text.id}
                 isUsable={isUsable}
@@ -36,6 +38,7 @@ const TextObject = ({text, isUsable}) => {
                                      style={{color: text.style?.color}}/>}
 
             />
+
         </RemoveObject>
     )
 }

@@ -11,18 +11,19 @@ const FontColorPopUp = ({id, category = 'shapes', addStyle, selected, handlePopU
 
 
     return (
-        <>
+        <div>
+
             <span onClick={() => handlePopUp('fontColor')}
                   style={{
                       color: `${style?.color}`
                   }}
                   className={css.fontColor}>A</span>
-            {selected === "fontColor"&&
-            <ContainerPopUp height={'180px'}>
-                <ColorPicker id={id} name={'color'} category={category} addStyle={addStyle}/>
-            </ContainerPopUp>
+            {selected === "fontColor" &&
+                    <ContainerPopUp height={'180px'}>
+                        <ColorPicker id={id} name={'color'} category={category} addStyle={addStyle}/>
+                    </ContainerPopUp>
             }
-        </>
+        </div>
     );
 };
 

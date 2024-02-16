@@ -1,8 +1,10 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit'
 import {removeDrawing, updateDrawings} from './drawingSlice';
 import {removeText, updateTexts} from './textSlice';
-import {auth, getData, setAllData} from "../../firebase/firebase";
+import {addNewBoard, auth, getData, isDocumentIsEmpty, setAllData} from "../../firebase/firebase";
 import {createSelector} from '@reduxjs/toolkit';
+import {setBoardId, setFetchStatus} from "./commonSlice";
+import {common} from "protobufjs";
 
 export interface shapeSlice {
     shapes: [object],
@@ -18,6 +20,7 @@ export const fetchData = createAsyncThunk('data/fetchData', async (args, {getSta
     const user = auth.currentUser;
     const response = await getData(user?.uid, args)
     return response
+
 })
 
 
@@ -26,20 +29,45 @@ export const fetchData = createAsyncThunk('data/fetchData', async (args, {getSta
 //     (rawValue) => rawValue.map(entry => entry.data)
 // );
 
-export const setWhiteboardData = createAsyncThunk('data/setData', async (args, {getState}) => {
+export const setWhiteboardData = createAsyncThunk<void>('data/setData', async (_, {getState}) => {
     const state = {...getState().present};
     const user = auth.currentUser;
-    delete state.auth;
 
-
-    if (state.common.fetchStatus && state.common.boardId)
-    setAllData({
+    if (state.common.fetchStatus && state.common.boardName) {
+        setAllData({
+            ...state,
+            shape: {
+                ...state.shape,
+                paths: []
+            }
+        }, user?.uid, state.common.boardId)
+    } else if (new Date().getTime() - new Date(auth.currentUser?.metadata.creationTime).getTime() < 10000 && await isDocumentIsEmpty(user?.uid)) {
+        addNewBoard(auth.currentUser?.uid).then((id) => {
+            setAllData({
+                ...state,
+                shape: {
+                    ...state.shape,
+                    paths: []
+                }
+            }, user?.uid, id)
+        })
+    }
+})
+export const createNewBoard = createAsyncThunk<string>('data/createBoard', async (boardName, {getState}) => {
+    const state = {...getState().present};
+    const user = auth.currentUser;
+    const response = await addNewBoard(user?.uid, {
         ...state,
+        common: {
+            ...state.common,
+            boardName
+        },
         shape: {
             ...state.shape,
             paths: []
         }
-    }, user?.uid, state.common.boardId)
+    })
+    return response
 })
 
 const initialState: shapeSlice = {
@@ -200,13 +228,14 @@ export function selectShape(state, id) {
     const indx = state.present.shape.shapes.findIndex(el => el.id === id)
     return state.present.shape.shapes[indx]
 }
+
 export function selectShapes(state) {
-     return state.present.shape.shapes
-}
-export function selectPaths(state) {
-     return state.present.shape.paths
+    return state.present.shape.shapes
 }
 
+export function selectPaths(state) {
+    return state.present.shape.paths
+}
 
 
 export function getId(collection, id) {

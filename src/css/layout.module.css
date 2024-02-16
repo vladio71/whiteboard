@@ -24,9 +24,9 @@
 
 .popUpPosition {
     position: absolute;
-    left: 4rem;
+    left: 3rem;
     animation: .1s linear 0s appear;
-    top: 2rem;
+    top: 5rem;
 }
 
 .popUp > *,
@@ -168,7 +168,8 @@
 .alinedPopUp {
     position: absolute;
     top: .4rem;
-    left: 3.8rem;
+    width: fit-content;
+    left: 3rem;
 }
 
 .colorCircle {

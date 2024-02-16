@@ -9,14 +9,14 @@ import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
 import {setBrush} from "../../../redux/Slices/drawingSlice";
 
 
-const DrawingPopUp = ({cancelStopPropagationRef, setShape, close}) => {
+const DrawingPopUp = ({cancelStopPropagationRef, selected, setSelected,  close}) => {
 
 
     const dispatch = useAppDispatch()
 
 
     const [index, setIndex] = useState(0)
-    const [selected, setSelected] = useState(1)
+    // const [selected, setSelected] = useState(1)
     const [selectedBrush, setSelectedBrush] = useState('Pen')
     const colors = useAppSelector(state => state.present.drawing.style.selected)
 
@@ -38,8 +38,8 @@ const DrawingPopUp = ({cancelStopPropagationRef, setShape, close}) => {
 
 
     return (
-        <div className={css.popUpPosition} style={{top: '-3rem'}}>
-            <ContainerPopUp height={'16rem'} width={'2.5rem'} colors={true}>
+        <div className={css.popUpPosition} style={{top: '1rem'}}>
+            <ContainerPopUp height={'16rem'} width={'2.5rem'} colors={true} isBottomPositioned={false}>
                 <div className={css.drawingPopUp} style={{paddingLeft: '0rem', width: '100%'}}>
                     <div className={css.option} onClick={close}>
                         <IoMdClose/>

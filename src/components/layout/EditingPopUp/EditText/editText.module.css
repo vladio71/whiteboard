@@ -2,7 +2,7 @@
 
 .container {
     cursor: pointer;
-    user-select: none;
+    /*user-select: none;*/
 }
 .selected{
     overflow:hidden;

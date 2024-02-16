@@ -1,7 +1,6 @@
 import {ShapeConstructor} from "./Rectangle";
 
 
-
 const Parallelogram = ({item}) => {
 
     function drawParallelogram(context, item) {
@@ -14,11 +13,12 @@ const Parallelogram = ({item}) => {
             context.lineTo(item.x, item.y + item.h);
 
     }
+
     return (
         <>
             <ShapeConstructor
                 item={item}
-                drawPathsFunction={(p1,p2,p3) => {
+                drawPathsFunction={(p1, p2, p3) => {
                     drawParallelogram(p1, {
                         x: item.x - 15,
                         y: item.y - 15,
@@ -34,8 +34,13 @@ const Parallelogram = ({item}) => {
                     })
 
                 }}
-                drawShapeFunction={(ctx) => {
-                    drawParallelogram(ctx, item)
+                drawShapeFunction={(ctx, scale) => {
+                    drawParallelogram(ctx, {
+                        x: 100 / scale,
+                        y: 100 / scale,
+                        w: item.w,
+                        h: item.h
+                    })
                 }}
             />
         </>

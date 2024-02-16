@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
 import {useDrawing} from "./useDrawing";
-import {selectDrawings} from "redux/Slices/drawingSlice";
+import {selectDrawings, selectDrawingStyle} from "redux/Slices/drawingSlice";
 import {selectCommon} from "redux/Slices/commonSlice";
 
 const DrawingTool = ({isUsed}) => {
@@ -16,6 +16,8 @@ const DrawingTool = ({isUsed}) => {
     const drawings = useAppSelector(selectDrawings)
     const brush = useAppSelector(state => state.present.drawing.brush)
     const common = useAppSelector(selectCommon)
+    const drawingStyle = useAppSelector(state => selectDrawingStyle(state))
+    const [delayedDown, setDelayedDown] = useState(false)
 
 
     const {
@@ -23,7 +25,17 @@ const DrawingTool = ({isUsed}) => {
         handleMove,
         handleUp,
         toggle,
-    } = useDrawing(brush, canvasRef, hiddenCanvasRef, ctx, down, setDown)
+    } = useDrawing(brush, drawingStyle, canvasRef, hiddenCanvasRef, ctx, down, setDown)
+
+    useEffect(() => {
+        if (!down) {
+            setTimeout(()=>{
+                setDelayedDown(down)
+            },200)
+        } else {
+            setDelayedDown(down)
+        }
+    }, [down])
 
     useEffect(() => {
 
@@ -37,36 +49,23 @@ const DrawingTool = ({isUsed}) => {
             }
             window.addEventListener('mouseup', handleUp)
             return () => {
-
                 window.removeEventListener('mousemove', handleMove)
                 window.removeEventListener('mousedown', handleDown)
                 window.removeEventListener('mouseup', handleUp)
-
             }
         }
-    }, [down, toggle, isUsed, brush, drawings])
+    }, [down, isUsed, brush, drawingStyle])
 
     const style = {
-        position: "absolute",
-        left: `${common.scrollX}px`,
-        top: `${common.scrollY}px`,
-        display: "block",
-        cursor: "crosshair",
-
+        position: "fixed",
+        display: delayedDown ? "block" : 'none',
+        zIndex: 10,
     }
-
 
     return (
         <>
-            <canvas  style={style} ref={canvasRef}></canvas>
-            <div
-                style={{visibility: "hidden"}}
-            >
-                <canvas ref={hiddenCanvasRef}></canvas>
-            </div>
+            <canvas style={style} ref={canvasRef}></canvas>
         </>
-
-
     )
 
 

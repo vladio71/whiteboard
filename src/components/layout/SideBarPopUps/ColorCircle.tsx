@@ -3,9 +3,11 @@ import css from "../../../css/layout.module.css";
 import * as React from "react";
 import ContainerPopUp from "../EditingPopUp/ContainerPopUp";
 import {OpacityHandler} from "../EditingPopUp/EditColors/helpers";
-import ColorPicker from "../EditingPopUp/EditColors/ColorPicker";
+import Colors, {ColorPicker} from "../EditingPopUp/EditColors/ColorPicker";
 import {addStyle} from "../../../redux/Slices/drawingSlice"
 import {useAppDispatch} from "../../../redux/hooks";
+import {PopUpWithColorPicker} from "../EditingPopUp/EditColors/BackgroundPopUp";
+// import Colors from "../EditingPopUp/EditColors/ColorPicker";
 
 
 const ColorCircle = ({id, open, color, isSelected, setOpen}) => {
@@ -17,14 +19,14 @@ const ColorCircle = ({id, open, color, isSelected, setOpen}) => {
 
 
     useEffect(() => {
-         if(isSelected===id && thickness!==undefined)
-        dispatch(addStyle({
-            id,
-            style: {
-                color: color.color,
-                thickness: thickness
-            }
-        }))
+        if (isSelected === id && thickness !== undefined)
+            dispatch(addStyle({
+                id,
+                style: {
+                    color: color.color,
+                    thickness: thickness
+                }
+            }))
 
     }, [isSelected, thickness])
 
@@ -40,13 +42,23 @@ const ColorCircle = ({id, open, color, isSelected, setOpen}) => {
     return (
         <>
 
-            <div className={css.colorBorder} onClick={() => setOpen(id)}
+            <div className={css.colorBorder}
+                 onClick={() => setOpen(id)}
                  style={{outline: `${isSelected === id ? '1px solid blue' : ''}`}}>
                 <div className={css.colorCircle} style={style}/>
                 {id === open && open === isSelected &&
-                <div className={css.alinedPopUp}>
-                    <ColorPopUp id={id} thickness={thickness} setThickness={setThickness}/>
-                </div>
+                    <div className={css.alinedPopUp}>
+                        <PopUpWithColorPicker
+                            id={id}
+                            left={'0rem'}
+                            name={'color'}
+                            top={'3rem'}
+                            height={'245px'}
+                            addStyle={addStyle}
+                            category={'drawing'}>
+                            <OpacityHandler id={id} value={thickness} setValue={setThickness} name={"Thickness"}/>
+                        </PopUpWithColorPicker>
+                    </div>
                 }
 
             </div>
@@ -55,39 +67,20 @@ const ColorCircle = ({id, open, color, isSelected, setOpen}) => {
     )
 }
 
-
 const ColorPopUp = ({id, thickness, setThickness}) => {
-
-    const container = useRef()
     return (
-
-        <PortalContainer>
-            <ContainerPopUp width={'10rem'} height={'12rem'} colors={false}>
-                <OpacityHandler id={id} value={thickness} setValue={setThickness} name={"Thickness"}/>
-                <ColorPicker containerRef={container} id={id} name={'color'} category={'drawing'}
-                             addStyle={addStyle}/>
-            </ContainerPopUp>
-        </PortalContainer>
-
-
+        <PopUpWithColorPicker
+            id={id}
+            left={'0rem'}
+            top={'3rem'}
+            height={'250px'}
+            addStyle={addStyle}
+            category={'drawing'}>
+            <OpacityHandler id={id} value={thickness} setValue={setThickness} name={"Thickness"}/>
+        </PopUpWithColorPicker>
     )
 }
 
-export const PortalContext = createContext(false);
-
-export const PortalContainer = (props) => {
-    const container = useRef()
-
-    return (
-        <div ref={container} >
-            <PortalContext.Provider value={container}>
-                {props.children}
-            </PortalContext.Provider>
-        </div>
-    )
-
-
-}
 
 
 export default ColorCircle

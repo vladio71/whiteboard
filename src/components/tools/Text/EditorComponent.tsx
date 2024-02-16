@@ -1,4 +1,4 @@
-import React, {useRef, useEffect, useContext, } from 'react';
+import React, {useRef, useEffect, useContext, useState,} from 'react';
 import {convertFromRaw, convertToRaw, Editor, EditorState} from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
@@ -18,9 +18,20 @@ function EditorComponent({id, style, object, category = 'shape'}) {
     const containerRef = useRef<React.ReactNode>(null)
     const edStateRef = useRef(state)
     const insideRef = useRef(false)
+    const [toggle, setToggle] = useState(false)
+    const mountRef = useRef(true)
+    const controlKeyDownRef = useRef(false)
 
 
     useEffect(() => {
+
+        if (object.copy && mountRef.current) {
+            setTimeout(() => mountRef.current = false)
+        } else {
+            handleFocus()
+        }
+
+
         function handleScroll(e) {
             e.preventDefault()
         }
@@ -33,7 +44,7 @@ function EditorComponent({id, style, object, category = 'shape'}) {
     }, [])
 
 
-    useClickOutside(containerRef, (e)=>{
+    useClickOutside(containerRef, (e) => {
         insideRef.current = false
     })
 
@@ -76,11 +87,6 @@ function EditorComponent({id, style, object, category = 'shape'}) {
     };
 
 
-    useEffect(() => {
-        handleFocus()
-    }, [focus])
-
-
     function updateState(editorState) {
         edStateRef.current = editorState
         if (category === 'shape') {
@@ -91,9 +97,7 @@ function EditorComponent({id, style, object, category = 'shape'}) {
         } else {
             dispatch(updateTextEditor({id: id, editor: convertToRaw(editorState.getCurrentContent())}))
         }
-        insideRef.current = false
     }
-
 
     function handleFocus() {
         if (!editor.current) return
@@ -111,33 +115,32 @@ function EditorComponent({id, style, object, category = 'shape'}) {
 
 
     function preventEditorPropagation(e) {
-
-        if (editor.current && document.activeElement.getAttribute("contenteditable") == null && e.key != "Backspace") {
+        if (e.ctrlKey && e.code === "KeyV") {
+            insideRef.current = false
+            document.activeElement.blur()
+            editor.current.blur()
+            setToggle(true)
+        } else if (editor.current && document.activeElement.getAttribute("contenteditable") == null && e.code != "Backspace" && !e.ctrlKey) {
             e.stopPropagation()
             editor.current.focus()
+            // console.log('here')
             insideRef.current = true
-        } else if (document.activeElement.getAttribute("contenteditable") != null ) {
+            setToggle(true)
+        } else if (document.activeElement.getAttribute("contenteditable") != null) {
             e.stopPropagation()
         }
-
-        // console.log(document.activeElement.getAttribute("contenteditable") != null)
-        //
-        // e.stopPropagation()
-
     }
-
 
     return (
         <div style={{...styles.root, ...style}}
              tabIndex={0}
-            // data-no-dnd={object?.editMode}
              ref={containerRef}
-             onKeyDown={preventEditorPropagation}>
+             onKeyDown={preventEditorPropagation}
+             onClick={() => setToggle(false)}
+        >
 
             <div style={{...styles.editor}}
                  onClick={object.editMode ? handleAddFocus : null}
-                // data-no-dnd={object?.editMode}
-
             >
                 <div>
                     <Editor textAlignment={"center"} ref={editor}
@@ -146,7 +149,6 @@ function EditorComponent({id, style, object, category = 'shape'}) {
                                     EditorState.forceSelection(edStateRef.current, EditorState.moveSelectionToEnd(edStateRef.current).getSelection()) :
                                     EditorState.acceptSelection(edStateRef.current, edStateRef.current.getSelection())
                             }
-
                             placeholder={"Type something"}
                             onChange={updateState}/>
 

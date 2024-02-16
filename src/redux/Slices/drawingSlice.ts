@@ -67,7 +67,7 @@ export const drawingSlice = createSlice({
     extraReducers: (builder => {
         builder
             .addCase(addLink, (state, action) => {
-                console.log(action.payload)
+                // console.log(action.payload)
                 if (action.payload.id[0] === "d") {
                     const id = getId(state.drawings, action.payload.id.slice(1) * 1)
                      if (Number.isInteger(id)) {

@@ -13,7 +13,7 @@ import {removeCurve} from "../../../redux/Slices/curvesSlice";
 import {removeDrawing} from "../../../redux/Slices/drawingSlice";
 import {removeText} from "../../../redux/Slices/textSlice";
 
-const ObjectWithModal = ({isUsable, handleBottom, handleTop, el}) => {
+const ObjectWithModal = memo(({isUsable, handleBottom, handleTop, el}) => {
 
     const dispatch = useAppDispatch()
     const [isModalActive, setIsModalActive] = useState(false)
@@ -57,7 +57,7 @@ const ObjectWithModal = ({isUsable, handleBottom, handleTop, el}) => {
     }
 
     function handleDelete(id: number) {
-        const func = el?.shape ? removeShape : el?.curve ? removeCurve : el?.dataUrl ? removeDrawing : removeText
+        const func = el?.shape ? removeShape : el?.curve ? removeCurve : el?.drawing ? removeDrawing : removeText
         dispatch(func(id))
     }
 
@@ -92,7 +92,7 @@ const ObjectWithModal = ({isUsable, handleBottom, handleTop, el}) => {
                             handleTop={handleTop}
                             handleBottom={handleBottom}
                         />
-                        : el?.dataUrl ?
+                        : el?.drawing ?
                             <DrawingObject key={el.id} drawing={el} isUsable={isUsable}/>
                             :
                             <TextObject key={el.id} text={el} isUsable={isUsable}/>
@@ -125,7 +125,7 @@ const ObjectWithModal = ({isUsable, handleBottom, handleTop, el}) => {
             {isLinkModalActive &&
                 <LinkModal
                     common={common}
-                    id={el?.shape ? el.id : el?.curve ? "c" + el.id : el?.dataUrl ? "d" + el.id : "t" + el.id}
+                    id={el?.shape ? el.id : el?.curve ? "c" + el.id : el?.drawing ? "d" + el.id : "t" + el.id}
                     isPresent={!!el?.link}
                     input={input}
                     handleCloseLinkModal={handleCloseLinkModal}
@@ -134,6 +134,6 @@ const ObjectWithModal = ({isUsable, handleBottom, handleTop, el}) => {
 
         </>
     )
-}
+})
 
 export default ObjectWithModal

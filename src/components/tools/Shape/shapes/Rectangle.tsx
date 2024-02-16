@@ -1,5 +1,4 @@
-import {useCallback, useContext, useEffect, useRef} from "react";
-import {useCanvas} from "./useCanvas";
+import {useEffect, useRef} from "react";
 import {useAppDispatch, useAppSelector} from "../../../../redux/hooks";
 import {selectShape, setPath} from "../../../../redux/Slices/shapesSlice";
 
@@ -14,8 +13,8 @@ const Rectangle = ({item}) => {
                     p2.rect(item.x, item.y, item.w, item.h)
                     p3.rect(item.x + 15, item.y + 15, item.w - 30, item.h - 30)
                 }}
-                drawShapeFunction={(ctx) => {
-                    ctx.rect(item.x, item.y, item.w, item.h)
+                drawShapeFunction={(ctx, scale) => {
+                    ctx.rect(100 / scale, 100 / scale, item.w, item.h)
                 }}
 
             />
@@ -29,33 +28,84 @@ export const ShapeConstructor = ({item, drawShapeFunction, drawPathsFunction}) =
     const dispatch = useAppDispatch()
     const object = useGetItemStyle(item)
     const common = useAppSelector(state => state.present.common)
+    const previousValueRef = useRef(0)
+    const canvasRef = useRef(null)
+    const contextRef = useRef(null)
 
 
-    const draw = useCallback(((item, ctx) => {
 
+    useEffect(() => {
+        const canvas = canvasRef.current
+        contextRef.current = canvas.getContext("2d")
+        canvas.width = object.w * common.scale + 200
+        canvas.height = object.h * common.scale + 200
+    }, [])
+
+    useEffect(() => {
+        const ctx = contextRef.current
+        const canvas = canvasRef.current
+        if (ctx) {
+            const prev = previousValueRef.current
+            const stepW = Math.abs(prev.w - object.w)
+            const stepH = Math.abs(prev.h - object.h)
+            if (stepH > 20 || stepH > 20) {
+                const w = Math.abs(stepW / 20)
+                const h = Math.abs(stepH / 20)
+                for (let i = 0; (i < w || i < h); i++) {
+                    canvas.width = object.w * common.scale + 200
+                    canvas.height = object.h * common.scale + 200
+                    drawOnce({
+                            ...object,
+                            w: prev.w + stepW * Math.min(w, i),
+                            h: prev.h + stepH * Math.min(h, i)
+                        },
+                        contextRef.current)
+                }
+            }
+            if (stepW === 0 && stepH === 0) {
+                setNewPath()
+            } else {
+                canvas.width = object.w * common.scale + 200
+                canvas.height = object.h * common.scale + 200
+                drawOnce(object, contextRef.current)
+            }
+            previousValueRef.current = {...object}
+        }
+    }, [object.x, object.y, object.w, object.h])
+
+    useEffect(()=>{
+        canvasRef.current.width = object.w * common.scale + 200
+        canvasRef.current.height = object.h * common.scale + 200
+        drawOnce(object, contextRef.current)
+    },[object.angle, object.style, common.scale, common.theme])
+
+    function setNewPath() {
         const out = new Path2D()
         const inside = new Path2D()
         const p = new Path2D()
-
         drawPathsFunction(out, p, inside)
+        if (item.style !== undefined)
+            setShapeInfo(dispatch, item, out, p, inside, common.scale)
+    }
 
+    function drawOnce(item, ctx) {
+        const out = new Path2D()
+        const inside = new Path2D()
+        const p = new Path2D()
+        drawPathsFunction(out, p, inside)
         ctx.transform(common.scale, 0, 0, common.scale, 0, 0)
-        configureContext(ctx, item, (ctx) => drawShapeFunction(ctx))
-
-        ctx.beginPath()
-        drawShapeFunction(ctx)
+        configureContext(ctx, item, (ctx) => drawShapeFunction(ctx, common.scale))
+        drawShapeFunction(ctx, common.scale)
         if (common.theme === "dark")
             ctx.filter = 'invert(1)'
         ctx.stroke()
         if (item.style !== undefined)
             setShapeInfo(dispatch, item, out, p, inside, common.scale)
-    }).bind(null, object), [object.center.x, object.center.y, object.angle, object.style, common.scale, common.theme])
-
-    const ref = useCanvas(draw, object)
+    }
 
 
     return (
-        <canvas style={{position: "absolute", inset: 0}} ref={ref}></canvas>
+        <canvas style={{position: "absolute", inset: 0}} ref={canvasRef}></canvas>
     )
 
 }
@@ -67,6 +117,10 @@ export function useGetItemStyle(item) {
 }
 
 export function setShapeInfo(dispatch, item, out, p, inside, scale = 1) {
+    console.log({
+        x: (item.x + item.w / 2),
+        y: (item.y + (item.shape === "Circle" ? item.w : item.h) / 2)
+    })
     dispatch(setPath({
         id: item.id,
         shape: item.shape,
@@ -94,10 +148,6 @@ export function setRectPath(dispatch, item, id) {
 }
 
 export function configureContext(ctx, item, func) {
-
-    ctx.translate(item.center.x, item.center.y)
-    ctx.rotate(item.angle * Math.PI / 180);
-    ctx.translate(-item.center.x, -item.center.y)
 
     if (item.style?.opacity >= 0) {
         ctx.globalAlpha = item.style.opacity

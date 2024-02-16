@@ -1,10 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, {memo, useEffect, useRef, useState} from 'react';
 import {useAppSelector} from "redux/hooks";
 import ObjectWithModal from './ObjectContextMenu/ObjectWithModal';
 import {selectDrawings} from "redux/Slices/drawingSlice";
 import {selectShapes} from "redux/Slices/shapesSlice";
 import {selectCurves} from "redux/Slices/curvesSlice";
 import {selectTexts} from "redux/Slices/textSlice";
+import useRefState from "../../app/hooks/useRefState";
 
 const LayersComponent = ({isUsable}: {
     isUsable: string
@@ -14,11 +15,11 @@ const LayersComponent = ({isUsable}: {
     const drawings: object[] = useAppSelector(selectDrawings)
     const curves: object[] = useAppSelector(selectCurves)
     const shapes: object[] = useAppSelector(selectShapes)
-    const texts: object[] = useAppSelector(selectTexts )
+    const texts: object[] = useAppSelector(selectTexts)
 
 
-    const [objects, setObjects] = useState<object[]>([])
-
+    const [update, setUpdate] = useState(false)
+    const [objects, setObjects] = useRefState([])
 
 
     useEffect(() => {
@@ -29,7 +30,7 @@ const LayersComponent = ({isUsable}: {
 
     useEffect(() => {
         updateCollection((el) => {
-            return !!el?.dataUrl
+            return !!el?.drawing
         }, drawings)
     }, [drawings])
 
@@ -41,25 +42,23 @@ const LayersComponent = ({isUsable}: {
 
     useEffect(() => {
         updateCollection((el) => {
-            return !(!!el?.shape || !!el?.dataUrl || !!el?.curve)
+            return !(!!el?.shape || !!el?.drawing || !!el?.curve)
         }, texts)
     }, [texts])
 
 
 
     function updateCollection(checkFunction: Function, collection: object[]) {
-        let len = objects.filter(el => checkFunction(el)).length
+        let len = objects.current.filter(el => checkFunction(el)).length
         if (len < collection.length) {
-            setObjects(prevState => {
-                if (collection === curves) {
-                    return [...collection.slice(len), ...prevState]
+            if (collection === curves) {
+                setObjects([...collection.slice(len), ...objects.current])
 
-                } else {
-                    return [...prevState, ...collection.slice(len)]
-                }
-            })
+            } else {
+                setObjects([...objects.current, ...collection.slice(len)])
+            }
         } else if (len === collection.length) {
-            setObjects(prevState => prevState.map(el => {
+            setObjects(objects.current.map(el => {
                 if (checkFunction(el)) {
                     let item = collection.find(item => item.id === el.id)
                     if (item) return item
@@ -67,51 +66,47 @@ const LayersComponent = ({isUsable}: {
                 return el
             }))
         } else {
-            setObjects(prevState => prevState.filter(el => {
+            setObjects(objects.current.filter(el => {
                 if (checkFunction(el) && !collection.find(o => o.id === el.id))
                     return false
                 return true
             }))
         }
+        setUpdate(!update)
     }
 
 
-    console.log(objects)
-
     function handleBringToTop(id: number) {
-        setObjects(prev => {
-            let temp = [...prev]
-            temp.push(prev[id])
+            let temp = [...objects.current]
+            temp.push(objects.current[id])
             temp.splice(id, 1)
-            return temp
-        })
+            setObjects(temp)
     }
 
     function handleBringToBottom(id: number) {
-        setObjects(prev => {
-            let temp = [...prev]
-            temp.unshift(prev[id])
+            let temp = [...objects.current]
+            temp.unshift(objects.current[id])
             temp.splice(id + 1, 1)
-            return temp
-        })
+            setObjects(temp)
     }
+
 
 
     return (
         <>
 
-            {objects &&
-            objects.map((el, id) => {
-                let key = el?.shape ? el.id : el?.curve ? "c" + el.id : el?.dataUrl ? "d" + el.id : "t" + el.id
-                console.log(key)
-                return <ObjectWithModal
+            {objects.current &&
+                objects.current.map((el, id) => {
+                    let key = el?.shape ? el.id : el?.curve ? "c" + el.id : el?.drawing ? "d" + el.id : "t" + el.id
+                    // console.log(key)
+                    return <ObjectWithModal
 
-                    key={key}
-                    isUsable={isUsable}
-                    handleBottom={() => handleBringToBottom(id)}
-                    handleTop={() => handleBringToTop(id)}
-                    el={el}/>
-            })
+                        key={key}
+                        isUsable={isUsable}
+                        handleBottom={() => handleBringToBottom(id)}
+                        handleTop={() => handleBringToTop(id)}
+                        el={el}/>
+                })
             }
 
         </>

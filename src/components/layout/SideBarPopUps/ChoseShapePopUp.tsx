@@ -14,7 +14,7 @@ const ChoseShapePopUp = ({setShape, setOpen}) => {
 
     return (
         <div className={css.popUpPosition}>
-            <ContainerPopUp height={'8rem'} width={'8rem'} colors={true}>
+            <ContainerPopUp height={'8rem'} width={'8rem'} colors={true} isBottomPositioned={false}>
                 <div className={css.popUp}
                     style={{
                         margin: '.7rem'

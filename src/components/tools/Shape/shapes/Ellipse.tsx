@@ -15,8 +15,8 @@ const Ellipse = ({item}) => {
                     p2.ellipse(centerX, centerY, radiusX, radiusY, Math.PI, 0, 2 * Math.PI)
                     p3.ellipse(centerX, centerY, Math.abs(radiusX - 15), Math.abs(radiusY - 30), Math.PI, 0, 2 * Math.PI)
                 }}
-                drawShapeFunction={(ctx) => {
-                    ctx.ellipse(centerX, centerY, radiusX, radiusY, Math.PI, 0, 2 * Math.PI)
+                drawShapeFunction={(ctx,scale) => {
+                    ctx.ellipse(100/scale+radiusX, 100/scale+radiusY, radiusX, radiusY, Math.PI, 0, 2 * Math.PI)
                 }}
             />
         </>
