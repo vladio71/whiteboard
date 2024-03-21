@@ -1,38 +1,34 @@
 'use client'
 
 import {combineReducers, configureStore} from '@reduxjs/toolkit'
-import undoable, {includeAction} from 'redux-undo';
-import shapeReducer, {updateShape, addShape, addStyle, removeShape} from './Slices/shapesSlice'
-import curveReducer, {updateCurve, addCurve} from './Slices/curvesSlice'
+import undoable, {groupByActionTypes, includeAction} from 'redux-undo';
+// import curveReducer, {updateCurve, addCurve} from './Slices/curvesSlice'
 import commonReducer from './Slices/commonSlice'
-import drawingReducer, {updateDrawing, addDrawing, removeDrawing} from './Slices/drawingSlice'
-import textReducer, {updateTextObject, addText} from './Slices/textSlice'
+// import drawingReducer, {updateDrawing, addDrawing, removeDrawing} from './Slices/drawingSlice'
+// import textReducer, {updateTextObject, addText} from './Slices/textSlice'
 import {FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE} from "redux-persist/es/constants";
 import storage from 'redux-persist/lib/storage';
 import {persistReducer, persistStore} from "redux-persist";
+import ItemsReducer, {addItem, removeItem, setItem, updateItem} from "./Slices/itemsSlice";
+import {batchGroupBy} from "../utils/batchGroupBy";
+import {lastActionMiddleware} from "./middleware/getLastAction";
+// import {ignoreSerializableCheck} from "./middleware/ignoreSerializableWarnings";
 
 
 const rootReducer = undoable(combineReducers({
         common: commonReducer,
-        shape: shapeReducer,
-        text: textReducer,
-        curve: curveReducer,
-        drawing: drawingReducer,
+        items: ItemsReducer,
     }),
     {
-        limit: 12,
+        limit: 15,
+        // groupBy: groupByActionTypes([updateItem.type, setItem.type]),
+        groupBy: batchGroupBy.init(['SOME_ACTION']),
+
         filter: includeAction([
-            updateShape.type,
-            addShape.type,
-            removeShape.type,
-            addStyle.type,
-            updateCurve.type,
-            addCurve.type,
-            updateDrawing.type,
-            addDrawing.type,
-            removeDrawing.type,
-            updateTextObject.type,
-            addText.type
+            addItem.type,
+            removeItem.type,
+            updateItem.type,
+            setItem.type
         ]),
     })
 
@@ -47,20 +43,16 @@ const persistConfig = {
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 
+
+
 export const store = configureStore({
     reducer: persistedReducer,
-    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware({
-            serializableCheck: {
-                ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-            },
-        }),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+        serializableCheck: false
+    }).concat(lastActionMiddleware),
 })
 
-export const persistor = persistStore(store, {
-    // manualPersist: true
-});
-
+export const persistor = persistStore(store);
 
 
 export type RootState = ReturnType<typeof store.getState>

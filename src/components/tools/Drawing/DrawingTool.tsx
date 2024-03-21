@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
 import {useDrawing} from "./useDrawing";
-import {selectDrawings, selectDrawingStyle} from "redux/Slices/drawingSlice";
+import { selectDrawingStyle} from "redux/Slices/itemsSlice";
 import {selectCommon} from "redux/Slices/commonSlice";
 
 const DrawingTool = ({isUsed}) => {
@@ -13,8 +13,8 @@ const DrawingTool = ({isUsed}) => {
 
     const canvasRef = useRef()
     const hiddenCanvasRef = useRef()
-    const drawings = useAppSelector(selectDrawings)
-    const brush = useAppSelector(state => state.present.drawing.brush)
+    // const drawings = useAppSelector(selectDrawings)
+    const brush = useAppSelector(state => state.present.items.brush)
     const common = useAppSelector(selectCommon)
     const drawingStyle = useAppSelector(state => selectDrawingStyle(state))
     const [delayedDown, setDelayedDown] = useState(false)
@@ -24,21 +24,20 @@ const DrawingTool = ({isUsed}) => {
         handleDown,
         handleMove,
         handleUp,
-        toggle,
     } = useDrawing(brush, drawingStyle, canvasRef, hiddenCanvasRef, ctx, down, setDown)
 
     useEffect(() => {
         if (!down) {
-            setTimeout(()=>{
+            setTimeout(() => {
                 setDelayedDown(down)
-            },200)
+            }, 300)
         } else {
             setDelayedDown(down)
         }
     }, [down])
 
-    useEffect(() => {
 
+    useEffect(() => {
         if (isUsed) {
             const canvas = canvasRef.current
             const ctx = canvas.getContext('2d')

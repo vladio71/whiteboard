@@ -1,11 +1,11 @@
-import {addDrawing, selectDrawingStyle, addDataUrl, selectDrawings} from "../../../redux/Slices/drawingSlice";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
-import {removeDrawing} from "../../../redux/Slices/drawingSlice";
+import {addItem, removeItem, selectDrawings} from "redux/Slices/itemsSlice";
 import {RefObject, useEffect, useRef, useState} from "react";
 import {checkRectIntersection} from "../Selection/SelectionTool";
 import {setRectPath} from "../Shape/shapes/Rectangle";
 import {selectCommon} from "redux/Slices/commonSlice";
-import {Point} from "../../../app/page";
+import {Point} from "/app/page";
+import {v4 as uuidv4} from 'uuid';
 
 
 // webp.grant_permission();
@@ -65,37 +65,47 @@ export const useDrawing = (brush, drawingStyle, canvasRef, hiddenCanvasRef, ctx,
             setToggle(!toggle)
 
             const borders = checkForBorders(currentPoints.current)
+            if (ctx === undefined) return
+            const drawing = {
+                x: (borders.minX + common.scrollX) / common.scale,
+                y: (borders.minY + common.scrollY) / common.scale,
+                startX: (borders.minX),
+                startY: (borders.minY),
+                w: Math.abs(borders.maxX - borders.minX) / common.scale,
+                h: Math.abs(borders.maxY - borders.minY) / common.scale,
+                startW: Math.abs(borders.maxX - borders.minX),
+                startH: Math.abs(borders.maxY - borders.minY),
+                color: color,
+                thickness: thickness
+            }
+            //
+            // dispatch(addDrawing({
+            //     ...drawing,
+            //     points: currentPoints.current.map(point => {
+            //         return {
+            //             x: point.x - drawing.startX + 50,
+            //             y: point.y - drawing.startY + 50
+            //         }
+            //     }),
+            //     drawing: true
+            // }))
+            dispatch(addItem({
+                id: uuidv4(),
+                ...drawing,
+                points: currentPoints.current.map(point => {
+                    return {
+                        x: point.x - drawing.startX + 50,
+                        y: point.y - drawing.startY + 50
+                    }
+                }),
+                drawing: true
+            }))
 
             setTimeout(() => {
-
-                if (ctx === undefined) return
-                const drawing = {
-                    x: (borders.minX + common.scrollX) / common.scale,
-                    y: (borders.minY + common.scrollY) / common.scale,
-                    startX: (borders.minX),
-                    startY: (borders.minY),
-                    w: Math.abs(borders.maxX - borders.minX) / common.scale,
-                    h: Math.abs(borders.maxY - borders.minY) / common.scale,
-                    startW: Math.abs(borders.maxX - borders.minX),
-                    startH: Math.abs(borders.maxY - borders.minY),
-                    color: color,
-                    thickness: thickness
-                }
-
-                dispatch(addDrawing({
-                    ...drawing,
-                    points: currentPoints.current.map(point => {
-                        return {
-                            x: point.x - drawing.startX + 50,
-                            y: point.y - drawing.startY + 50
-                        }
-                    }),
-                    drawing: true
-                }))
                 ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
                 currentPoints.current = []
-
-            }, 100)
+                // }, 100)
+            },)
         }
 
         const loop = (ctx) => {
@@ -143,7 +153,7 @@ export const useDrawing = (brush, drawingStyle, canvasRef, hiddenCanvasRef, ctx,
             }
             drawings.forEach((rect, id) => {
                 if (checkRectIntersection(selection, rect)) {
-                    dispatch(removeDrawing(rect.id))
+                    dispatch(removeItem(rect.id))
                 }
             })
 

@@ -2,9 +2,9 @@ import React, {useState} from "react";
 import css from './EditColors/EditingColors.module.css'
 import SelectFont from "./EditText/SelectFont";
 import SelectSize from "./EditText/SelectSize";
-import {addStyle} from "../../../redux/Slices/textSlice";
+import {addStyle} from "../../../redux/Slices/itemsSlice";
 import FontColorPopUp from "components/layout/EditingPopUp/EditShape/FontColorPopUp";
-import {checkPopUpPosition} from "../../../app/utils/utils";
+import {checkPopUpPosition} from "../../../utils/utils";
 
 const EditTextPopUp = ({text}) => {
 

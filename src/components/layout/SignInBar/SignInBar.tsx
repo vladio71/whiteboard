@@ -5,7 +5,7 @@ import ContainerPopUp from "../EditingPopUp/ContainerPopUp";
 import {CiLocationArrow1} from "react-icons/ci";
 import Link from "next/link";
 import {auth} from "@/firebase/firebase";
-import usePreventOutsideMouseEvents from "app/hooks/usePreventMouseEvents";
+import usePreventOutsideMouseEvents from "hooks/usePreventMouseEvents";
 
 
 const SignInBar = () => {

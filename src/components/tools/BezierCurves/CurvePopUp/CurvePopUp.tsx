@@ -2,10 +2,10 @@ import React, {useState} from "react";
 import css from "../../../layout/EditingPopUp/EditColors/EditingColors.module.css";
 import {ColoredCircle} from "../../../layout/EditingPopUp/EditColors/helpers";
 import BackgroundPopUp from "../../../layout/EditingPopUp/EditColors/BackgroundPopUp";
-import {addStyle} from "../../../../redux/Slices/curvesSlice"
+import {addStyle} from "../../../../redux/Slices/itemsSlice"
 import {MdOutlineTextIncrease, MdOutlineTimeline} from "react-icons/md";
 import TypePopUp from "./TypePopUp";
-import {checkPopUpPosition} from "../../../../app/utils/utils";
+import {checkPopUpPosition} from "../../../../utils/utils";
 
 const CurvePopUp = ({curve}) => {
 

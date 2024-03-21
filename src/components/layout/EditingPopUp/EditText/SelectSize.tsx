@@ -2,12 +2,12 @@ import css from './editText.module.css'
 import React, {useEffect, useState} from "react";
 import ContainerPopUp from "../ContainerPopUp";
 import {useAppDispatch, useAppSelector} from "../../../../redux/hooks";
-import {selectStyles} from "../../../../redux/Slices/shapesSlice";
-import {addStyle} from '../../../../redux/Slices/shapesSlice'
+import {selectStyles,addStyle} from "../../../../redux/Slices/itemsSlice";
+// import {addStyle} from '../../../../redux/Slices/shapesSlice'
 import {HiOutlineArrowSmDown, HiOutlineArrowSmUp} from "react-icons/hi";
 import {useDidMountEffect} from "../EditColors/helpers";
 
-const SelectSize = ({id, show, setShow, category="shapes", add=addStyle}) => {
+const SelectSize = ({id, show, setShow, category="shapes"}) => {
 
     const dispatch = useAppDispatch()
     const style = useAppSelector((state) => selectStyles(state, id, category))
@@ -25,7 +25,7 @@ const SelectSize = ({id, show, setShow, category="shapes", add=addStyle}) => {
     }, [show])
 
     useDidMountEffect(() => {
-        dispatch(add({id, style: {fontSize: `${selected}`}}))
+        dispatch(addStyle({id, style: {fontSize: `${selected}`}}))
     }, [selected])
 
 

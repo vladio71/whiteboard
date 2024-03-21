@@ -1,10 +1,10 @@
-import React, {memo, useContext, useEffect, useRef} from "react";
+import React, {memo, useContext, useEffect, useMemo, useRef} from "react";
 import ContainerResizeComponent from "../DndResizeRotateContainer/ContainerResizeComponent";
-import {removeDrawing, updateDrawing} from "../../../redux/Slices/drawingSlice";
 import RemoveObject from "../../layout/utils/RemoveObject";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
 import {setRectPath, setShapeInfo} from "components/tools/Shape/shapes/Rectangle";
 import {drawPoints, getLineWidth, midPointBtw} from "./useDrawing";
+import {getUpdates, removeItem, updateItem} from "redux/Slices/itemsSlice";
 
 
 const DrawingObject = ({drawing, isUsable}) => {
@@ -13,11 +13,11 @@ const DrawingObject = ({drawing, isUsable}) => {
 
 
     function saveChangesDrawing(object) {
-        dispatch(updateDrawing(object))
+        dispatch(updateItem(getUpdates(object)))
     }
 
     return (
-        <RemoveObject key={drawing.id} removeFunc={removeDrawing} id={drawing.id}>
+        <RemoveObject key={drawing.id} removeFunc={removeItem} id={drawing.id}>
             <ContainerResizeComponent
                 isUsable={isUsable}
                 editorObject={drawing}
@@ -44,8 +44,6 @@ const DrawingImage = ({object}) => {
         const scaleY = object.h / object.startH
         canvas.width = (object.w + 15) * (common.scale) + 100
         canvas.height = (object.h + 15) * (common.scale) + 100
-
-
         ctx.lineJoin = 'round'
         ctx.lineCap = "round";
 
@@ -53,21 +51,18 @@ const DrawingImage = ({object}) => {
             ctx.filter = 'invert(1)'
         ctx.transform(scaleX * (common.scale), 0, 0, scaleY * (common.scale), 0, 0)
 
-        ctx.strokeStyle=object.color
+        ctx.strokeStyle = object.color
         ctx.lineWidth = getLineWidth(object.thickness, common.scale)
 
         drawPoints([...object.points], ctx)
-        setRectPath(dispatch, object, "d" + object.id)
+        setRectPath(dispatch, object, object.id)
 
-    }, [object.center.x, object.center.y, object.angle, object.style, object.down, common.scale, common.theme])
+    }, [object.x, object.y, object.h, object.w, object.angle, object.style, object.down, common.scale, common.theme])
 
     const urlImageStyle = {
         position: "absolute",
         left: 50,
         top: 50,
-        // width: object.w + 20,
-        // height: object.h + 20
-
     }
 
     return (

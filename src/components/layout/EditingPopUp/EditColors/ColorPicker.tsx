@@ -3,7 +3,7 @@ import {ChromePicker} from 'react-color'
 import {ColoredCircle} from "./helpers";
 import React, { useEffect, useRef, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../../../redux/hooks";
-import {selectStyles} from "../../../../redux/Slices/shapesSlice";
+import {selectStyles} from "../../../../redux/Slices/itemsSlice";
 
 
 const Colors = ({id, name, category = 'shapes', addStyle, children}) => {
@@ -59,6 +59,7 @@ export const ColorPicker = ({id, name, addStyle, isOpen}) => {
 
     const handleChangeComplete = (color) => {
         setColor(color.rgb)
+
         // if (adding) return
         dispatch(addStyle({
             id,

@@ -35,7 +35,6 @@ export async function createNewUser(email, password) {
 }
 
 export async function removeUser() {
-    console.log(auth)
     if (auth?.currentUser)
         deleteUser(auth.currentUser).then(() => {
             toast.success("Data cleared!")

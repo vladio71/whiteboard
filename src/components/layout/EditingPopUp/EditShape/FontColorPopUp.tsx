@@ -3,7 +3,7 @@ import ContainerPopUp from "components/layout/EditingPopUp/ContainerPopUp";
 import ColorPicker from "components/layout/EditingPopUp/EditColors/ColorPicker";
 import css from "components/layout/EditingPopUp/EditColors/EditingColors.module.css";
 import {useAppSelector} from "redux/hooks";
-import {selectStyles} from "redux/Slices/shapesSlice";
+import {selectStyles} from "redux/Slices/itemsSlice";
 
 const FontColorPopUp = ({id, category = 'shapes', addStyle, selected, handlePopUp}) => {
 

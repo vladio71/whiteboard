@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit'
-import {addLink, fetchData, getId, setWhiteboardData} from "./shapesSlice";
+import {addLink, fetchData, getId, setWhiteboardData} from "./itemsSlice";
 import {ActionCreators} from 'redux-undo';
 import {auth, getData} from "@/firebase/firebase";
 
@@ -10,7 +10,7 @@ const initialState = {
     w: 0,
     scale: 1,
     fetchStatus: false,
-    isFetchingNow: false,
+    isFetching: false,
     uploadStatus: false,
     isAuthLoading: false,
     boardId: null,
@@ -58,6 +58,9 @@ export const CommonSlice = createSlice({
         setUploadStatus: (state, action) => {
             state.uploadStatus = action.payload
         },
+        setItemsIdsOrder: (state, action) => {
+            state.itemsIdsOrder = [...action.payload]
+        },
 
 
     },
@@ -74,10 +77,10 @@ export const CommonSlice = createSlice({
                     }
                 }
                 state.fetchStatus = true
-                state.isFetchingNow = false
+                state.isFetching = false
             })
             .addCase(fetchData.pending, (state, action) => {
-                state.isFetchingNow = true
+                state.isFetching = true
             })
             .addCase('store/reset', () => {
                 return initialState
@@ -104,6 +107,7 @@ export const {
     setBoardId,
     setAuthStatus,
     setBoardName,
+    setItemsIdsOrder,
     setRefreshFlag,
     setFetchStatus,
     updateTheme

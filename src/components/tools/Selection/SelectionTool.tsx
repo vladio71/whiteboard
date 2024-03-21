@@ -1,9 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
-import {selectDrawings, updateDrawings} from "../../../redux/Slices/drawingSlice";
-import {selectCurves, updateCurves} from "../../../redux/Slices/curvesSlice";
-import {updateShapes, selectShapes, setObjectInfo} from "../../../redux/Slices/shapesSlice";
-import {selectTexts, updateTexts} from "../../../redux/Slices/textSlice";
+import {updateItems, selectItems, setObjectInfo, getUpdates} from "../../../redux/Slices/itemsSlice";
 import {selectCommon} from "redux/Slices/commonSlice";
 
 
@@ -20,10 +17,10 @@ const SelectionTool = ({isUsed}) => {
     const [style, setStyle] = useState({})
 
 
-    const drawings = useAppSelector(selectDrawings)
-    const curves = useAppSelector(selectCurves)
-    const shapes = useAppSelector(selectShapes)
-    const texts = useAppSelector(selectTexts)
+    // const drawings = useAppSelector(selectDrawings)
+    // const curves = useAppSelector(selectCurves)
+    const shapes = useAppSelector(selectItems)
+    // const texts = useAppSelector(selectTexts)
     const common = useAppSelector(selectCommon)
 
 
@@ -83,10 +80,11 @@ const SelectionTool = ({isUsed}) => {
         }
 
 
+
         if (checkCollection(shapes, 'shape')) return
-        if (checkCollection(curves, 'curve')) return
-        if (checkCollection(texts, 'text')) return
-        if (checkCollection(drawings, 'drawing')) return
+        // if (checkCollection(curves, 'curve')) return
+        // if (checkCollection(texts, 'text')) return
+        // if (checkCollection(drawings, 'drawing')) return
 
 
         setStart({
@@ -134,43 +132,42 @@ const SelectionTool = ({isUsed}) => {
 
 
         if (isUpdating || isUpdatingBack) {
-            let temp = drawings.map(el => {
-                return {...el}
-            })
+            // let temp = drawings.map(el => {
+            //     return {...el}
+            // })
+            //
+            // drawings.forEach((rect, id) => {
+            //     temp[id].selected = checkRectIntersection(selection, rect);
+            // })
+            // dispatch(updateDrawings(temp))
+            //
+            // temp = texts.map(el => {
+            //     return {...el}
+            // })
+            //
+            //
+            // texts.forEach((rect, id) => {
+            //     temp[id].selected = checkRectIntersection(selection, rect);
+            // })
+            // dispatch(updateTexts(temp))
+            //
+            // temp = curves.map(el => {
+            //     return {...el}
+            // })
+            // temp.forEach((curve, id) => {
+            //     temp[id].selected = checkRectIntersection(selection, curve.borders);
+            // })
+            // dispatch(updateCurves(temp))
 
-            drawings.forEach((rect, id) => {
-                temp[id].selected = checkRectIntersection(selection, rect);
-            })
-            dispatch(updateDrawings(temp))
 
-            temp = texts.map(el => {
-                return {...el}
-            })
-
-
-            texts.forEach((rect, id) => {
-                temp[id].selected = checkRectIntersection(selection, rect);
-            })
-            dispatch(updateTexts(temp))
-
-            temp = curves.map(el => {
-                return {...el}
-            })
-            temp.forEach((curve, id) => {
-                temp[id].selected = checkRectIntersection(selection, curve.borders);
-            })
-            dispatch(updateCurves(temp))
-
-
-            temp = shapes.map(el => {
+            const temp = shapes.map(el => {
                 return {...el}
             })
             temp.forEach((shape, id) => {
 
-
-                temp[id].selected = checkRectIntersection(selection, shape);
+                temp[id].selected = checkRectIntersection(selection, getRect(shape?.borders || shape));
             })
-            dispatch(updateShapes(temp))
+            dispatch(updateItems(getUpdates(temp)))
         }
     }
 

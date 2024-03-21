@@ -2,7 +2,7 @@ import Colors, {ColorPicker} from "./ColorPicker";
 import React, {useEffect, useState} from "react";
 import {OpacityHandler, useDidMountEffect} from "./helpers";
 import ContainerPopUp from "../ContainerPopUp";
-import {selectStyles} from "../../../../redux/Slices/shapesSlice";
+import {selectStyles} from "../../../../redux/Slices/itemsSlice";
 import {useAppDispatch, useAppSelector} from "../../../../redux/hooks";
 import {AiOutlinePlus} from "react-icons/ai";
 
@@ -49,8 +49,6 @@ export const PopUpWithColorPicker = ({
 
     const [isColorPickerOpen, setIsColorPickerOpen] = useState(false)
 
-
-    console.log(addStyle)
     return (
         <div style={{
             display: 'flex',

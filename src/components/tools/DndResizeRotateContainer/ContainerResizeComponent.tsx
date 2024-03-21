@@ -45,7 +45,7 @@ const ContainerResizeComponent =
         const container = useRef()
         const child = useRef()
         const overlay = useRef()
-        const editCurveStatus = useAppSelector(state => state.present.curve.status)
+        const editCurveStatus = useAppSelector(state => state.present.items.status)
         const common = useAppSelector(state => state.present.common)
 
 

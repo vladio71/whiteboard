@@ -3,7 +3,7 @@ import css from "../../Board/Board.module.css";
 import {IoIosCloseCircleOutline} from "react-icons/io";
 import Link from "next/link";
 import GlassBackground from "components/layout/EditingPopUp/GlassModal/GlassBackground";
-import {createNewBoard} from "redux/Slices/shapesSlice";
+import {createNewBoard} from "redux/Slices/itemsSlice";
 import {useAppDispatch} from "redux/hooks";
 import {useRouter} from "next/navigation";
 import {LoadingAnimation} from "../../../../app/auth/AuthForm";
@@ -37,19 +37,15 @@ const GlassModalAddBoard = ({isModalActive, handleCloseModal}) => {
                         value={boardName}
                         onChange={(e) => setBoardName(e.target.value)}
                     />
-                    {/*<Link href={`/board/new/${boardName}`}>*/}
                     {isLoading?
                         <button className={`${css.Modal_button} ${css.grey}`}
                                 disabled={true}
-                                // onClick={handleCreateBoard}
                         >
                             Create Board
                             <div style={{
                                 position: "relative",
                                 width: '1rem',
                                 height: '1rem',
-                                // right: '-1.5rem',
-                                // top:"-.1rem",
                             }}>
                                 <LoadingAnimation/>
                             </div>

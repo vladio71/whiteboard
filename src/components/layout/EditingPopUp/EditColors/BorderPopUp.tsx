@@ -4,7 +4,7 @@ import {OpacityHandler, useDidMountEffect} from "./helpers";
 import css from "./EditingColors.module.css";
 import {useSelector} from "react-redux";
 import ContainerPopUp from "../ContainerPopUp";
-import {addStyle, selectStyles} from "../../../../redux/Slices/shapesSlice";
+import {addStyle, selectStyles} from "../../../../redux/Slices/itemsSlice";
 import {useAppDispatch, useAppSelector} from "../../../../redux/hooks";
 import {PopUpWithColorPicker} from "./BackgroundPopUp";
 

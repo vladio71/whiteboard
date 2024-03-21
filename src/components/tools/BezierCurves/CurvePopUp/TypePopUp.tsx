@@ -2,8 +2,8 @@ import {useAppDispatch, useAppSelector} from "../../../../redux/hooks";
 import React, {useEffect, useState} from "react";
 import ContainerPopUp from "../../../layout/EditingPopUp/ContainerPopUp";
 import {OpacityHandler} from "../../../layout/EditingPopUp/EditColors/helpers";
-import {addStyle} from "../../../../redux/Slices/curvesSlice"
-import {selectStyles} from "../../../../redux/Slices/shapesSlice";
+import {addStyle} from "../../../../redux/Slices/itemsSlice"
+import {selectStyles} from "../../../../redux/Slices/itemsSlice";
 import {LineType} from "../../../layout/EditingPopUp/EditColors/BorderPopUp";
 
 const TypePopUp = ({id}) => {

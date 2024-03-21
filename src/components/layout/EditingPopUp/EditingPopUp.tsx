@@ -7,9 +7,9 @@ import SelectFont from "./EditText/SelectFont";
 import SelectSize from "./EditText/SelectSize";
 import TextEditPopUp from "./EditText/TextEditPopUp";
 import SelectShape from "./EditShape/SelectShape";
-import {addStyle} from "../../../redux/Slices/shapesSlice";
+import {addStyle} from "../../../redux/Slices/itemsSlice";
 import FontColorPopUp from "components/layout/EditingPopUp/EditShape/FontColorPopUp";
-import {checkPopUpPosition} from "../../../app/utils/utils";
+import {checkPopUpPosition} from "../../../utils/utils";
 
 
 const EditingPopUp = ({id, item}) => {

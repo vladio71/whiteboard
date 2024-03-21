@@ -1,6 +1,6 @@
 import {useEffect, useRef} from "react";
 import {useAppDispatch, useAppSelector} from "../../../../redux/hooks";
-import {selectShape, setPath} from "../../../../redux/Slices/shapesSlice";
+import {selectItem, setPath} from "../../../../redux/Slices/itemsSlice";
 
 
 const Rectangle = ({item}) => {
@@ -112,15 +112,11 @@ export const ShapeConstructor = ({item, drawShapeFunction, drawPathsFunction}) =
 
 
 export function useGetItemStyle(item) {
-    const style = useAppSelector(state => selectShape(state, item.id))?.style
+    const style = useAppSelector(state => selectItem(state, item.id))?.style
     return {...item, style}
 }
 
 export function setShapeInfo(dispatch, item, out, p, inside, scale = 1) {
-    console.log({
-        x: (item.x + item.w / 2),
-        y: (item.y + (item.shape === "Circle" ? item.w : item.h) / 2)
-    })
     dispatch(setPath({
         id: item.id,
         shape: item.shape,

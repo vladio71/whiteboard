@@ -6,7 +6,7 @@ import Link from 'next/link'
 import ContainerPopUp from "../EditingPopUp/ContainerPopUp";
 import commCss from "css/common.module.css"
 import GlassModalEditBoard from "components/layout/EditingPopUp/GlassModal/GlassModalEditBoard";
-import useClickOutside from "../../../app/hooks/useClickOutside";
+import useClickOutside from "../../../hooks/useClickOutside";
 
 
 const Board = ({id, common, handleDeletion, handleUpdate}) => {

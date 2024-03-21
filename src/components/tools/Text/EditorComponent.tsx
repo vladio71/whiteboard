@@ -1,34 +1,49 @@
 import React, {useRef, useEffect, useContext, useState,} from 'react';
-import {convertFromRaw, convertToRaw, Editor, EditorState} from 'draft-js';
+import Draft, {
+    ContentState,
+    convertFromHTML,
+    convertFromRaw,
+    convertToRaw,
+    Editor,
+    EditorState,
+    RichUtils
+} from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
 import {updateEditor} from '../../../redux/Slices/shapesSlice'
-import {selectTextEditor, updateTextEditor} from "../../../redux/Slices/textSlice";
+import {selectItem, updateTextEditor} from "../../../redux/Slices/itemsSlice";
 import {ObjectContext} from "../DndResizeRotateContainer/ContainerResizeComponent";
-import useClickOutside from "../../../app/hooks/useClickOutside";
+import useClickOutside from "../../../hooks/useClickOutside";
+import {convertToHTML} from 'draft-convert'
 
 
 function EditorComponent({id, style, object, category = 'shape'}) {
     const editor = useRef()
     const dispatch = useAppDispatch()
-    const element = useAppSelector(state => selectTextEditor(state, id, category))
+    const element = useAppSelector(state => selectItem(state, id))
     const common = useAppSelector(state => state.present.common)
-    const state = element ? EditorState.createWithContent(convertFromRaw(element.editor)) : EditorState.createEmpty()
+    // const state = EditorState.createWithContent(convertFromRaw(element.editor))
     const shapeStyle = element?.style
     const containerRef = useRef<React.ReactNode>(null)
-    const edStateRef = useRef(state)
+    const edStateRef = useRef(EditorState.createWithContent(convertFromRaw(element.editor)))
     const insideRef = useRef(false)
     const [toggle, setToggle] = useState(false)
     const mountRef = useRef(true)
-    const controlKeyDownRef = useRef(false)
+    // const controlKeyDownRef = useRef(false)
 
+
+    // useEffect(()=>{
+    //     // edStateRef.current = EditorState.createWithContent(convertFromRaw(element.editor))
+    //     console.log('wtf')
+    // },[element.editor])
 
     useEffect(() => {
 
         if (object.copy && mountRef.current) {
             setTimeout(() => mountRef.current = false)
         } else {
-            handleFocus()
+            if (Date.now() - object.creationTime < 1000)
+                handleFocus()
         }
 
 
@@ -87,16 +102,18 @@ function EditorComponent({id, style, object, category = 'shape'}) {
     };
 
 
+
+
     function updateState(editorState) {
         edStateRef.current = editorState
-        if (category === 'shape') {
-            dispatch(updateEditor({
-                id: id,
-                editor: convertToRaw(editorState.getCurrentContent())
-            }))
-        } else {
-            dispatch(updateTextEditor({id: id, editor: convertToRaw(editorState.getCurrentContent())}))
-        }
+        console.log(editorState.getSelection())
+        const selection = editorState.getSelection()
+        const selectionState = {
+            focusOffset: selection.focusOffset,
+            anchorOffset: selection.anchorOffset,
+            isBackward: selection.isBackward
+        };
+        dispatch(updateTextEditor({id: id, selectionState, editor: convertToRaw(editorState.getCurrentContent())}))
     }
 
     function handleFocus() {
@@ -123,7 +140,7 @@ function EditorComponent({id, style, object, category = 'shape'}) {
         } else if (editor.current && document.activeElement.getAttribute("contenteditable") == null && e.code != "Backspace" && !e.ctrlKey) {
             e.stopPropagation()
             editor.current.focus()
-            // console.log('here')
+            edStateRef.current = EditorState.forceSelection(edStateRef.current, EditorState.moveSelectionToEnd(edStateRef.current).getSelection())
             insideRef.current = true
             setToggle(true)
         } else if (document.activeElement.getAttribute("contenteditable") != null) {
@@ -131,25 +148,37 @@ function EditorComponent({id, style, object, category = 'shape'}) {
         }
     }
 
+    function handleKeyCommand(command, editorState) {
+        const newState = RichUtils.handleKeyCommand(editorState, command);
+        if (newState) {
+            updateState(newState)
+            return 'handled';
+        }
+        return 'not-handled';
+    }
+
+
     return (
         <div style={{...styles.root, ...style}}
              tabIndex={0}
              ref={containerRef}
              onKeyDown={preventEditorPropagation}
-             onClick={() => setToggle(false)}
+             // onClick={() => setToggle(false)}
         >
-
             <div style={{...styles.editor}}
                  onClick={object.editMode ? handleAddFocus : null}
             >
                 <div>
                     <Editor textAlignment={"center"} ref={editor}
                             editorState={
-                                insideRef.current ?
-                                    EditorState.forceSelection(edStateRef.current, EditorState.moveSelectionToEnd(edStateRef.current).getSelection()) :
-                                    EditorState.acceptSelection(edStateRef.current, edStateRef.current.getSelection())
+                                edStateRef.current
+                                // insideRef.current ?
+                                //     EditorState.forceSelection(edStateRef.current, EditorState.moveSelectionToEnd(edStateRef.current).getSelection()) :
+                                //     // EditorState.forceSelection(edStateRef.current, EditorState.moveSelectionToEnd(edStateRef.current).getSelection())
+                                //     EditorState.acceptSelection(edStateRef.current, edStateRef.current.getSelection())
                             }
                             placeholder={"Type something"}
+                            handleKeyCommand={handleKeyCommand}
                             onChange={updateState}/>
 
                 </div>

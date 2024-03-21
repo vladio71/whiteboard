@@ -6,7 +6,7 @@ import {BsEraser, BsPen} from "react-icons/bs";
 import ColorCircle from "./ColorCircle";
 import {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
-import {setBrush} from "../../../redux/Slices/drawingSlice";
+import {setBrush} from "../../../redux/Slices/itemsSlice";
 
 
 const DrawingPopUp = ({cancelStopPropagationRef, selected, setSelected,  close}) => {
@@ -18,7 +18,7 @@ const DrawingPopUp = ({cancelStopPropagationRef, selected, setSelected,  close})
     const [index, setIndex] = useState(0)
     // const [selected, setSelected] = useState(1)
     const [selectedBrush, setSelectedBrush] = useState('Pen')
-    const colors = useAppSelector(state => state.present.drawing.style.selected)
+    const colors = useAppSelector(state => state.present.items.drawingStyle.selected)
 
 
     useEffect(() => {

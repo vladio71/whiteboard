@@ -1,8 +1,11 @@
 import React, {useContext, useEffect, useRef, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
-import {addCurve, removeCurve, selectCurves} from "../../../redux/Slices/curvesSlice"
+// import {selectCurves} from "../../../redux/Slices/curvesSlice"
 import {LevelContext} from "../../../app/page";
 import {selectCommon} from "redux/Slices/commonSlice";
+import {addItem} from "../../../redux/Slices/itemsSlice";
+import {v4 as uuidv4} from 'uuid';
+
 
 const CurvesCreationTool = ({add, setShape, isUsable}) => {
 
@@ -19,7 +22,7 @@ const CurvesCreationTool = ({add, setShape, isUsable}) => {
         start.current = data
     }
     const refAdding = useRef(null)
-    const curves = useAppSelector(selectCurves)
+    // const curves = useAppSelector(selectCurves)
     const common = useAppSelector(selectCommon)
     const curveRef = useRef({})
 
@@ -50,6 +53,8 @@ const CurvesCreationTool = ({add, setShape, isUsable}) => {
         setDown(true)
         setEnd(false)
         if (e !== null) {
+
+
             setStart({
                 // x: (e.clientX + common.scrollX) / common.scale - change,
                 // y: (e.clientY + common.scrollY) / common.scale - change
@@ -62,15 +67,21 @@ const CurvesCreationTool = ({add, setShape, isUsable}) => {
 
 
         setTimeout(() => {
-            dispatch(addCurve({
+            if (!curveRef.current?.points) {
+                handleMove(e)
+            }
+
+            dispatch(addItem({
                 ...curveRef.current,
                 shapeIndex: e === null ? level?.shapeId : -1,
                 new: true,
+                id: uuidv4()
             }))
             setShape('Selection')
             setDown(false)
             setEnd(!end)
             level?.setStart({x: 0, y: 0})
+            curveRef.current = {}
             setTimeout(() => {
                 const canvas = refAdding.current
                 canvas.width = window.innerWidth
@@ -84,7 +95,9 @@ const CurvesCreationTool = ({add, setShape, isUsable}) => {
 
     function handleMove(e) {
 
-        if (!down || !add) return
+        // console.log(down)
+        // console.log(add)
+        // if (!down || !add) return
         const canvas = refAdding.current
         const ctx = canvas.getContext("2d")
         canvas.width = window.innerWidth
@@ -94,8 +107,14 @@ const CurvesCreationTool = ({add, setShape, isUsable}) => {
             x: (e.clientX + common.scrollX) / common.scale,
             y: (e.clientY + common.scrollY) / common.scale
         };
-        let cp1 = {x: (end.x - start.current.x) / 5 + start.current.x, y: ((end.y - start.current.y) / 5) * 4 + start.current.y};
-        let cp2 = {x: ((end.x - start.current.x) / 5) * 4 + start.current.x, y: (end.y - start.current.y) / 5 + start.current.y};
+        let cp1 = {
+            x: (end.x - start.current.x) / 5 + start.current.x,
+            y: ((end.y - start.current.y) / 5) * 4 + start.current.y
+        };
+        let cp2 = {
+            x: ((end.x - start.current.x) / 5) * 4 + start.current.x,
+            y: (end.y - start.current.y) / 5 + start.current.y
+        };
 
 
         const curve = new Path2D();
@@ -122,9 +141,7 @@ const CurvesCreationTool = ({add, setShape, isUsable}) => {
         ctx.closePath();
         ctx.fill();
         ctx.restore();
-
         curveRef.current = {
-            id: 0,
             curve: true,
             angle: endingAngle,
             points: [start.current, end],
@@ -151,10 +168,6 @@ const CurvesCreationTool = ({add, setShape, isUsable}) => {
 }
 
 export const getPointOnCurve = function (p0, p1, p2, p3, t) {
-
-    // const x = p3.x - (p3.x - p1.x) / t
-    // const y = p3.y - (p3.y - p1.y) / t
-
     const x = (1 - t) * (1 - t) * (1 - t) * p0.x + 3 * (1 - t) * (1 - t) * t * p1.x + 3 * (1 - t) * t * t * p2.x + t * t * t * p3.x
     const y = (1 - t) * (1 - t) * (1 - t) * p0.y + 3 * (1 - t) * (1 - t) * t * p1.y + 3 * (1 - t) * t * t * p2.y + t * t * t * p3.y
     return {x: x, y: y}

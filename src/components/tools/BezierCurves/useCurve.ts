@@ -1,10 +1,15 @@
 import {useEffect, useRef, useState} from "react";
 import {getPointOnCurve} from "./CurvesCreationTool";
-import {setEditStatus, setShapeIndices, updateCurve} from "../../../redux/Slices/curvesSlice";
+import {setEditStatus, setItem, setShapeIndices, updateItem, updateWithNoUndo} from "../../../redux/Slices/itemsSlice";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
-import {selectPaths, selectStyles} from "../../../redux/Slices/shapesSlice";
+import {
+    getUpdates,
+    selectPath,
+    selectPaths,
+    selectStyles,
+} from "../../../redux/Slices/itemsSlice";
 import {setTimeout} from "timers";
-import {debounce} from "app/utils/utils";
+import {debounce} from "utils/utils";
 import {selectCommon} from "redux/Slices/commonSlice";
 import {
     AlignCurveToNearestPoint,
@@ -19,12 +24,14 @@ import {
     makeHightOrderCurvePath,
     moveCurve
 } from "./utils";
-import useClickOutside from "../../../app/hooks/useClickOutside";
+import useClickOutside from "../../../hooks/useClickOutside";
 import {checkForBorders} from "../Drawing/useDrawing";
-import useRefState from "../../../app/hooks/useRefState";
+import useRefState from "../../../hooks/useRefState";
+import {batchGroupBy} from "../../../utils/batchGroupBy";
+import {getIsUndoAction, getLastAction} from "../../../redux/middleware/getLastAction";
 
 
-export function useCurve(curve, ref, sample, setSample, container, isUsable, handleTop, borders, handleBottom) {
+export function useCurve(curve, ref, sample, setSample, container, isUsable, borders) {
 
     const paths = useAppSelector(selectPaths)
     const style = useAppSelector(state => selectStyles(state, curve.id, "curves"))
@@ -57,12 +64,13 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
     const dispatch = useAppDispatch()
     const [additionalPoints, setAddPoints] = useState([])
     const [plist, setPoints] = useRefState([])
-    const [ControlPoint, setControlPoint] = useRefState(!curve?.new ? '' : '2')
+    const [ControlPoint, setControlPoint] = useRefState(!curve?.new ? '' : '1')
     const [editMode, setEditMode] = useState(false)
     const [isAttached, setIsAttached] = useRefState(false)
     const [isAttachedBack, setIsAttachedBack] = useRefState(false)
     const [down, setDown] = useState(curve?.new)
-    const [editPoint, setEditPoint] = useState(1)
+    // const [editPoint, setEditPoint] = useState(1)
+    const [editPoint, setEditPoint] = useState(!curve?.new ? null : 1)
     const [replacePoint, setReplace] = useState({x: 0, y: 0})
     const [removeCount, setRemoveCount] = useState(0)
     const [update, setUpdate] = useState(false)
@@ -79,8 +87,9 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
     const mountedRefPaths = useRef(0)
     const requestAnimationFrameRef = useRef(0)
     const debouncedUpdateCurve = useRef(debounce((data) => {
-        dispatch(updateCurve(...data))
-    }, 200))
+        dispatch(updateItem(...data))
+        batchGroupBy.end()
+    }, 100))
 
 
     useEffect(() => {
@@ -99,10 +108,14 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
         if (down) {
             dispatch(setEditStatus(true))
         }
-        dispatch(updateCurve({
-            ...sample,
+        dispatch(updateItem(getUpdates({
+            ...sample.current,
             new: false
-        }))
+        })))
+        setSample({
+            ...sample.current,
+           new: false
+        })
         if (curve.shapeIndex !== -1)
             setIsAttached(true)
 
@@ -115,11 +128,17 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
     useEffect(() => {
         if (mountedRef.current !== 0) {
             dispatch(setShapeIndices({
-                id: sample.id,
-                shapeIndexStart: pathIndexForward,
-                shapeIndex: pathIndexBack
+                id: sample.current.id,
+                shapeIndexStart: pathIndexForward || -1,
+                shapeIndex: pathIndexBack || -1
             }))
             setUpdate(!update)
+            setSample({
+                ...sample.current,
+                shapeIndexStart: pathIndexForward || -1,
+                shapeIndex: pathIndexBack || -1
+            })
+
 
         } else {
             mountedRef.current = 1
@@ -130,7 +149,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
     useEffect(() => {
         if (mountedRefPaths.current !== 0) {
             setDown(true)
-            if (common.scale == scale.current)
+            if (common.scale == scale.current && !getIsUndoAction()) // don`t call it when triggered buy undo/redo action
                 followShapes(objectSnapshot, shapeStartPath, true, followShapes(objectSnapshotBack, shapeEndPath, false))
             setObjectSnapshot(shapeStartPath)
             setObjectSnapshotBack(shapeEndPath)
@@ -188,6 +207,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
     function followShapes(snapshot, currentPath, isForward, points?) {
 
 
+        // console.log('follow')
         if (snapshot !== null && snapshot !== undefined && currentPath !== undefined) {
             const isMoved = snapshot.center.x !== currentPath.center.x || snapshot.center.y !== currentPath.center.y
             const isScaled = snapshot.w !== currentPath.w || snapshot.h !== currentPath.h
@@ -219,7 +239,6 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
             } else if (isMoved) {
                 const deltaX = snapshot.center.x - currentPath.center.x
                 const deltaY = snapshot.center.y - currentPath.center.y
-
                 point = {x: p.x - deltaX, y: p.y - deltaY}
             }
 
@@ -252,8 +271,10 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
 
     function selectShapes(state) {
         return [
-            state.present.shape.paths.find(el => el.id === pathIndexForward),
-            state.present.shape.paths.find(el => el.id === pathIndexBack),
+            selectPath(state, pathIndexForward),
+            selectPath(state, pathIndexBack)
+            // state.present.items.paths.find(el => el.id === pathIndexForward),
+            // state.present.shape.paths.find(el => el.id === pathIndexBack),
         ]
     }
 
@@ -297,17 +318,18 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
 
         cancelAnimationFrame(requestAnimationFrameRef.current)
 
-        dispatch(updateCurve({
+        dispatch(updateItem(getUpdates({
             ...sample.current,
+            // new: false,
             // borders: checkForBorders(getPoints(sample.current.points)),
             borders: getBordersForSelection(sample.current.points),
-        }))
+        })))
         setDown(false)
         setControlPoint('')
         setReplace({x: e.clientX, y: e.clientY})
         setUpdate(!update)
         setEditPoint(null)
-        handleTop()
+        // handleTop()
         dispatch(setEditStatus(false))
 
 
@@ -348,7 +370,6 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
 
         if (!down) return;
         e.preventDefault()
-
 
         const clientX = (e.clientX + common.scrollX) / common.scale
         const clientY = (e.clientY + common.scrollY) / common.scale
@@ -402,6 +423,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
             } else {
                 nPoint = {x: Math.round(clientX + del.x), y: Math.round(clientY + del.y)}
             }
+
 
 
             let isAlignmentNeeded = Array.isArray(nPoint)
@@ -461,15 +483,16 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
 
                 if (isNewOne === 1) {
                     if (forward && cPointId >= temp.length - 1) {
+
                         temp.splice(newIndx - 1, deleteCount + removeCount + 1, newPoint)
                     } else if (back && cPointId === 0) {
                         temp.splice(0, deleteCount + removeCount + 1, newPoint)
                     } else {
-                        temp.splice(newIndx, deleteCount + removeCount, newPoint)
+                        const PathsOverlayGap = ControlPoint.current[0] === 'a' ? 0 : 1
+                        temp.splice(newIndx, deleteCount + removeCount + PathsOverlayGap, newPoint)
                     }
 
                 } else {
-
                     if (isAttached.current && cPointId >= temp.length - 1) {
                         temp.splice(newIndx - 1, deleteCount + 1, newPoint)
 
@@ -489,6 +512,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
 
 
             const {endingAngle} = getCurveArrowAngle(temp, borders, common, style)
+
 
             setSample({
                 ...sample.current,
@@ -549,7 +573,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
 
 
     function magnetAlignment(ctx, e, nPoint, cPointId, clientX, clientY) {
-        for (let i = 0; i < paths.length; i++) {
+        for (let i = paths.length - 1; i >= 0; i--) {
             const p = paths[i]
             const isPointInside = ctx.isPointInPath(p.i, clientX, clientY);
             const isPointNearLine = ctx.isPointInPath(p.o, clientX, clientY);
@@ -607,16 +631,19 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
 
     function convertCubicToHighOrderCurve(nPoint, ctx) {
         let temp = [...sample.current.points]
+        // console.log(temp)
+        // console.log([...sample.current.points])
+
         const newIndx = ControlPoint.current * 1
         if (newIndx === 0)
             nPoint.reverse()
+
 
         temp.splice(newIndx, 1, ...nPoint)
         if (newIndx !== 0)
             setControlPoint(temp.length - 1)
 
         const delta = {x: temp[1].x - temp[0].x, y: temp[1].y - temp[0].y}
-
 
         temp.splice(1, 1, {x: temp[0].x + delta.x / 3, y: temp[0].y + delta.y / 3})
 
@@ -652,7 +679,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, han
     }
 
     function handleControlPointDown(string, p = null) {
-        handleBottom()
+        // handleBottom()
         dispatch(setEditStatus(true))
         setDown(true)
         // loop()

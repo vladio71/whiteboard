@@ -6,12 +6,10 @@ import DrawingObject from "../../tools/Drawing/DrawingObject";
 import TextObject from "../../tools/Text/TextObject";
 import css from './ObjectWithModal.module.css'
 import ContainerPopUp from "../EditingPopUp/ContainerPopUp";
-import {saveObjectInfo, removeShape} from "../../../redux/Slices/shapesSlice"
+import {saveObjectInfo, removeItem} from "../../../redux/Slices/itemsSlice"
 import LinkModal from "./LinkModal";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
-import {removeCurve} from "../../../redux/Slices/curvesSlice";
-import {removeDrawing} from "../../../redux/Slices/drawingSlice";
-import {removeText} from "../../../redux/Slices/textSlice";
+
 
 const ObjectWithModal = memo(({isUsable, handleBottom, handleTop, el}) => {
 
@@ -57,8 +55,8 @@ const ObjectWithModal = memo(({isUsable, handleBottom, handleTop, el}) => {
     }
 
     function handleDelete(id: number) {
-        const func = el?.shape ? removeShape : el?.curve ? removeCurve : el?.drawing ? removeDrawing : removeText
-        dispatch(func(id))
+        // const func = el?.shape ? removeItem : el?.curve ? removeCurve : el?.drawing ? removeDrawing : removeText
+        dispatch(removeItem(id))
     }
 
 
@@ -76,6 +74,7 @@ const ObjectWithModal = memo(({isUsable, handleBottom, handleTop, el}) => {
     }, [isModalActive])
 
 
+
     return (
         <>
             <div onContextMenu={handleModal}>
@@ -89,8 +88,6 @@ const ObjectWithModal = memo(({isUsable, handleBottom, handleTop, el}) => {
                         <CurveObject
                             curve={el}
                             isUsable={isUsable}
-                            handleTop={handleTop}
-                            handleBottom={handleBottom}
                         />
                         : el?.drawing ?
                             <DrawingObject key={el.id} drawing={el} isUsable={isUsable}/>
@@ -125,7 +122,7 @@ const ObjectWithModal = memo(({isUsable, handleBottom, handleTop, el}) => {
             {isLinkModalActive &&
                 <LinkModal
                     common={common}
-                    id={el?.shape ? el.id : el?.curve ? "c" + el.id : el?.drawing ? "d" + el.id : "t" + el.id}
+                    id={el.id}
                     isPresent={!!el?.link}
                     input={input}
                     handleCloseLinkModal={handleCloseLinkModal}

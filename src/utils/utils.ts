@@ -1,6 +1,6 @@
 import {clearTimeout, setTimeout} from "timers";
-import {useAppSelector} from "../../redux/hooks";
-import {selectCommon} from "../../redux/Slices/commonSlice";
+import {useAppSelector} from "../redux/hooks";
+import {selectCommon} from "../redux/Slices/commonSlice";
 
 export function debounce(cb: Function, delay: number) {
     let timer = null

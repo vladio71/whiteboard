@@ -5,14 +5,14 @@ import comCss from 'css/common.module.css'
 import ContainerPopUp from "../EditingPopUp/ContainerPopUp";
 import {LevelContext} from "app/page";
 import ThemeSwitch from "components/layout/utils/ThemeSwitch";
-import {debounce, preventTools} from "app/utils/utils";
-import {setWhiteboardData} from "redux/Slices/shapesSlice";
+import {debounce, preventTools} from "utils/utils";
+import {setWhiteboardData} from "redux/Slices/itemsSlice";
 import {useAppDispatch} from "redux/hooks";
 import {setTimeout} from "timers";
 import { AiOutlineSave } from "react-icons/ai"
 import { GoPlus } from "react-icons/go";
 import { FiMinus } from "react-icons/fi";
-import usePreventOutsideMouseEvents from "../../../app/hooks/usePreventMouseEvents";
+import usePreventOutsideMouseEvents from "../../../hooks/usePreventMouseEvents";
 
 
 

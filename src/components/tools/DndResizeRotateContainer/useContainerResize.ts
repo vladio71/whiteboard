@@ -1,7 +1,8 @@
 import {useContext, useEffect, useMemo, useRef, useState} from "react";
 import {LevelContext} from "../../../app/page";
 import {useAppSelector} from "../../../redux/hooks";
-import useClickOutside from "../../../app/hooks/useClickOutside";
+import useClickOutside from "../../../hooks/useClickOutside";
+import {batchGroupBy} from "../../../utils/batchGroupBy";
 
 
 export const useContainerResize = (editorObject, isUsable, child, container, saveChanges) => {
@@ -58,7 +59,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
 
 
     useEffect(() => {
-        // setObject({...editorObject, angle: object.angle}) // here is the gem
+        setObject({...editorObject, angle: object.angle}) // here is the gem
     }, [editorObject.x, editorObject.y, editorObject.w, editorObject.h, editorObject?.shape])
 
     useEffect(() => {
@@ -80,6 +81,10 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
     function handleMouseDown(e) {
 
         if (e.button != 0 || isUsable !== "Selection") return
+        //TODO:if(thereis curves attached and it`s shape wrapper)
+        batchGroupBy.start()
+
+
         timerRef.current = new Date();
         const clientX = e.clientX + common.scrollX
         const clientY = e.clientY + common.scrollY
@@ -331,6 +336,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
     }
 
     async function handleMouseUp(e) {
+        batchGroupBy.confirmEnd()
         setDown(false)
         // setToggle(!toggle)
         setDirection('')
@@ -339,7 +345,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
             return prev
         })
 
-         // if (object) {
+        // if (object) {
         //     saveChanges(object)
         // }
     }
@@ -376,15 +382,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
         setEditMode(false)
         level?.setOption("Curve")
         level?.setStart({x: (x + common.scrollX) / common.scale, y: (y + common.scrollY) / common.scale})
-        if (editorObject?.drawing) {
-            level?.setShapeId("d" + editorObject.id)
-        } else if (editorObject?.shape) {
-            level?.setShapeId(editorObject.id)
-        } else {
-            level?.setShapeId("t" + editorObject.id)
-
-        }
-
+        level?.setShapeId(editorObject.id)
 
     }
 

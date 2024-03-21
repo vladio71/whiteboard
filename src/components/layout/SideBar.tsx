@@ -8,20 +8,26 @@ import {LuMousePointer2} from "react-icons/lu";
 import ChoseShapePopUp from "./SideBarPopUps/ChoseShapePopUp";
 import DrawingPopUp from "./SideBarPopUps/DrawingPopUp";
 import CaptionOnHover from "./utils/CaptionOnHover";
-import {updateDrawings, addDrawing, selectDrawings} from "../../redux/Slices/drawingSlice";
-import {selectCurves, updateCurves} from "../../redux/Slices/curvesSlice";
-import {addText, selectTexts, updateTexts} from "../../redux/Slices/textSlice";
-import {addCurve} from "../../redux/Slices/curvesSlice";
-import {updateShapes, saveObjectInfo, addShape, selectShapes} from "../../redux/Slices/shapesSlice";
+// import {selectCurves} from "../../redux/Slices/curvesSlice";
+// import {addItem} from "../../redux/Slices/curvesSlice";
+import {
+    updateItems,
+    saveObjectInfo,
+    addItem,
+    selectItems,
+    getUpdates,
+    selectDrawings, setAllItems
+} from "../../redux/Slices/itemsSlice";
 import {useAppDispatch, useAppSelector} from "../../redux/hooks";
 import {BiText} from "react-icons/bi";
 import {ActionCreators} from 'redux-undo';
 import {IoReturnDownBack, IoReturnUpForwardOutline} from "react-icons/io5";
 import {Point} from "../../app/page";
-import {preventTools} from "app/utils/utils";
+import {preventTools} from "utils/utils";
 import {selectCommon} from "redux/Slices/commonSlice";
 import {moveCurve} from "../tools/BezierCurves/utils";
 import {ChromePicker} from "react-color";
+import {v4 as uuidv4} from 'uuid';
 
 
 const SideBar = memo(({setShape, setOption, option}) => {
@@ -32,14 +38,14 @@ const SideBar = memo(({setShape, setOption, option}) => {
     const popUps = useRef(null)
     const [selected, setSelected] = useState(1)
     const [toggle, setToggle] = useState(false)
-    const [mousePosition, setMousePosition] = useState<Point>({x: 0, y: 0})
+    // const [mousePosition, setMousePosition] = useState<Point>({x: 0, y: 0})
     const [caption, setCaption] = useState('')
     const drawings = useAppSelector(selectDrawings)
-    const curves = useAppSelector(selectCurves)
-    const shapes = useAppSelector(selectShapes)
-    const texts = useAppSelector(selectTexts)
+    // const curves = useAppSelector(selectCurves)
+    const shapes = useAppSelector(selectItems)
+    // const texts = useAppSelector(selectTexts)
     const common = useAppSelector(selectCommon)
-    const savedObject = useAppSelector(state => state.present.shape.savedObject.saved)
+    const savedObject = useAppSelector(state => state.present.items.savedObject.saved)
     const toolbarRef = useRef(null)
     const bottomRef = useRef(null)
     const mousePositionRef = useRef<Point>(null)
@@ -50,7 +56,7 @@ const SideBar = memo(({setShape, setOption, option}) => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown)
         }
-    }, [open, toggle, drawings, curves, shapes, mousePositionRef.current, option])
+    }, [open, toggle, shapes, mousePositionRef.current, option])
 
 
     useEffect(() => {
@@ -99,9 +105,10 @@ const SideBar = memo(({setShape, setOption, option}) => {
             path
         } = moveCurve(object, d)
 
-        dispatch(addCurve({
+        dispatch(addItem({
             ...newCurve,
-            curve: path
+            curve: path,
+            id: uuidv4()
         }))
 
     }
@@ -120,10 +127,10 @@ const SideBar = memo(({setShape, setOption, option}) => {
         }
 
         if (e.code === "Backspace" || e.code === "Delete") {
-            dispatch(updateDrawings(drawings.filter(el => !el.selected)))
-            dispatch(updateCurves(curves.filter(el => !el.selected)))
-            dispatch(updateShapes(shapes.filter(el => !el.selected)))
-            dispatch(updateTexts(texts.filter(el => !el.selected)))
+            dispatch(setAllItems({
+                items: shapes.filter(el => !el.selected),
+                removeIds: shapes.filter(el => el.selected).map(el => el.id)
+            }))
             setToggle(!toggle)
 
         }
@@ -135,24 +142,24 @@ const SideBar = memo(({setShape, setOption, option}) => {
         if (e.code === 'KeyV' && e.ctrlKey) {
             if (!savedObject) return
 
-            // const temp = (savedObject.object?.borders|| savedObject.object)
             const temp = (savedObject.object)
 
             const object = {
                 ...temp,
+                id: uuidv4(),
                 x: (mousePositionRef.current.x + common.scrollX) / common.scale - (temp?.borders?.w || temp.w) / 2,
                 y: (mousePositionRef.current.y + common.scrollY) / common.scale - (temp?.borders?.h || temp.h) / 2,
                 copy: true
             }
 
             if (savedObject.type === 'shape') {
-                dispatch(addShape(object))
+                dispatch(addItem(object))
             }
             if (savedObject.type === 'text') {
-                dispatch(addText(object))
+                dispatch(addItem(object))
             }
             if (savedObject.type === 'drawing') {
-                dispatch(addDrawing(object))
+                dispatch(addItem(object))
             }
             if (savedObject.type === 'curve') {
                 handleCurveCopy(object)
@@ -162,21 +169,9 @@ const SideBar = memo(({setShape, setOption, option}) => {
         if (e.code === 'KeyA' && e.altKey) {
             setOpen('')
             setOption("Selection")
-            dispatch(updateDrawings(drawings.map(el => {
+            dispatch(updateItems(getUpdates(shapes.map(el => {
                 return {...el, selected: true}
-            })))
-            dispatch(updateCurves(curves.map(el => {
-                return {...el, selected: true}
-            })))
-            dispatch(updateShapes(shapes.map(el => {
-                return {...el, selected: true}
-            })))
-
-            dispatch(updateTexts(texts.map(el => {
-                return {...el, selected: true}
-            })))
-
-
+            }))))
             setToggle(!toggle)
         }
 

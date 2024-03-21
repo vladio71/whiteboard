@@ -12,7 +12,7 @@ import {FaPlus} from "react-icons/fa/index";
 import GlassModalAddBoard from "components/layout/EditingPopUp/GlassModal/GlassModalAddBoard";
 import {ActionCreators} from "redux-undo";
 import LoaderPlaceHolder from "components/layout/utils/LoaderPlaceHolder";
-import {setWhiteboardData} from "redux/Slices/shapesSlice";
+import {setWhiteboardData} from "redux/Slices/itemsSlice";
 
 export interface Point {
     x: number,

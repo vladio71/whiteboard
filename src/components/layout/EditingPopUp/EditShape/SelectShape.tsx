@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../../../redux/hooks";
-import {selectShape, changeShape} from "../../../../redux/Slices/shapesSlice";
+import {selectItem, changeShape} from "../../../../redux/Slices/itemsSlice";
 import {MdOutlineRectangle} from "react-icons/md";
 import {CgShapeRhombus} from "react-icons/cg";
 import {BiRectangle} from "react-icons/bi";
@@ -14,7 +14,7 @@ import css from "./EditingShapes.module.css";
 const SelectShape = ({id}) => {
 
     const dispatch = useAppDispatch()
-    const shapeState = useAppSelector((state) => selectShape(state, id))
+    const shapeState = useAppSelector((state) => selectItem(state, id))
     const [open, setOpen] = useState(false)
     const [shape, setShape] = useState(shapeState?.shape)
     const dict = {

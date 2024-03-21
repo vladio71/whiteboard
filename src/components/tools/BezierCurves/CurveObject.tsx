@@ -2,23 +2,21 @@ import React, {useEffect, useRef, useState} from "react";
 import css from '../../../css/curves.module.css'
 import {useResizeLogic} from "../Shape/useResizeLogic";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
-import {removeCurve} from "../../../redux/Slices/curvesSlice";
+import {removeItem} from "../../../redux/Slices/itemsSlice";
 import ControlPoint from "./ControlPoint";
 import {useCurve} from "./useCurve";
 import CurvePopUp from "./CurvePopUp/CurvePopUp";
-import {selectStyles} from "../../../redux/Slices/shapesSlice";
+// import {selectStyles} from "../../../redux/Slices/shapesSlice";
 import RemoveObject from "../../layout/utils/RemoveObject";
 import {drawArrow, getDefaultBezierControlPoints, getPoints, makeHightOrderCurvePath} from "./utils";
 import {checkForBorders} from "../Drawing/useDrawing";
 import PositionCanvasCurve from "./PositionCanvasCurve";
-import useRefState from "../../../app/hooks/useRefState";
+import useRefState from "../../../hooks/useRefState";
 
 
 const CurveObject = ({
     curve,
     isUsable,
-    handleTop,
-    handleBottom
 }) => {
 
     const [update, setUpdate] = useState(false)
@@ -76,9 +74,9 @@ const CurveObject = ({
         setSample,
         container,
         isUsable,
-        handleTop,
+        // handleTop,
         borders,
-        handleBottom
+        // handleBottom
     )
 
 
@@ -92,7 +90,7 @@ const CurveObject = ({
 
     return (
         <>
-            <RemoveObject removeFunc={removeCurve} id={curve.id}>
+            <RemoveObject removeFunc={removeItem} id={curve.id}>
                 <div ref={container} tabIndex={1}
                      style={styleContainer}
                      className={css.container}
@@ -133,7 +131,7 @@ const CurveObject = ({
 
                     </>
                 }
-                <PositionCanvasCurve sample={sample} canvasRef={ref} down={down} common={common}/>
+                <PositionCanvasCurve sample={sample} curve={curve} canvasRef={ref} down={down} common={common}/>
             </RemoveObject>
         </>
     )

@@ -6,7 +6,7 @@ import {drawArrow, getDefaultBezierControlPoints, getPoints, makeHightOrderCurve
 
 
 // let canvas, ctx
-const PositionCanvasCurve = ({canvasRef, sample, down, common}) => {
+const PositionCanvasCurve = ({canvasRef, curve, sample, down, common}) => {
 
 
     const requestAnimationFrameRef = useRef(0)
@@ -38,6 +38,7 @@ const PositionCanvasCurve = ({canvasRef, sample, down, common}) => {
             requestAnimationFrameRef.current = requestAnimationFrame(loop)
     }
 
+
     useEffect(() => {
         downRef.current = down
         if (down) {
@@ -46,11 +47,10 @@ const PositionCanvasCurve = ({canvasRef, sample, down, common}) => {
             loop()
             cancelAnimationFrame(requestAnimationFrameRef.current)
         }
-        return ()=>{
+        return () => {
             cancelAnimationFrame(requestAnimationFrameRef.current)
         }
-    }, [down, common.scale, sample.current.style, common.theme])
-
+    }, [down, common.scale, sample.current.style, common.theme, curve])
 
 
     function draw(c, ctx, bords, end = null) {
@@ -83,7 +83,6 @@ const PositionCanvasCurve = ({canvasRef, sample, down, common}) => {
             pointsForRender.splice(1, 0, cp1, cp2)
         }
         makeHightOrderCurvePath(cur, pointsForRender)
-
 
 
         if (common.theme === "dark")

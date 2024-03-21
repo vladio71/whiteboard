@@ -1,44 +1,83 @@
 import ContainerPopUp from "../ContainerPopUp";
-import React, {useEffect} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import css from './editText.module.css'
-import {selectShape, updateEditor} from '../../../../redux/Slices/shapesSlice'
+import {selectItem, updateEditor, updateTextEditor} from '../../../../redux/Slices/itemsSlice'
 import {convertFromRaw, convertToRaw, Editor, EditorState, RichUtils, SelectionState} from 'draft-js';
 import {useAppDispatch, useAppSelector} from "../../../../redux/hooks";
+import useRefState from "../../../../hooks/useRefState";
 
 
-const TextEditPopUp = ({id,close}) => {
+const TextEditPopUp = ({id, close}) => {
 
 
     const dispatch = useAppDispatch()
-    const state = (useAppSelector(state => selectShape(state,id)).editorState)
+    // const item = EditorState.createWithContent(convertFromRaw(useAppSelector(state => selectShape(state, id))))
+    const item = useAppSelector(state => selectItem(state, id))
+    const [state, setState] = useRefState(null)
+    const edst = useRef(null)
+    const sec = useRef(null)
+
+
+    useEffect(() => {
+        if (item?.editor && item?.selectionState) {
+            const edState = EditorState.createWithContent(convertFromRaw(item.editor))
+            const selectionState = edState.getSelection()
+            const updatedSelection = selectionState.merge({
+                focusOffset: item.selectionState.focusOffset,
+                anchorOffset: item.selectionState.anchorOffset,
+                isBackward: item.selectionState.isBackward
+            });
+
+            setState(EditorState.acceptSelection(edState, updatedSelection))
+
+        }
+
+
+    }, [item?.editor, item?.selectionState])
+    //
+    // const selectionState = state.getSelection()
+    // const updatedSelection = selectionState.merge({
+    //     focusOffset: 0,
+    //     anchorOffset: 20,
+    // });
+
     // dispatch(updateEditor({id: id, editor: convertToRaw(newEditorState.getCurrentContent())}))
 
 
+    function boldSelection(e) {
+        // var selection = state.getSelection();
 
+        if (state.current) {
+            const newEditorState = RichUtils.toggleInlineStyle(state.current, 'BOLD');
+            dispatch(updateTextEditor({id: id,  editor: convertToRaw(newEditorState.getCurrentContent())}))
+        }
+        // close()
 
-    function boldSelection() {
-         const newEditorState = RichUtils.toggleInlineStyle(state, 'BOLD');
-        dispatch(updateEditor({id: id, editor: convertToRaw(newEditorState.getCurrentContent())}))
-        close()
     }
 
     function italicSelection() {
-        const newEditorState = RichUtils.toggleInlineStyle(state, 'ITALIC');
-        dispatch(updateEditor({id: id, editor: convertToRaw(newEditorState.getCurrentContent())}))
+        if (state.current) {
+            const newEditorState = RichUtils.toggleInlineStyle(state.current, 'ITALIC');
+            dispatch(updateTextEditor({id: id, editor: convertToRaw(newEditorState.getCurrentContent())}))
+        }
         close()
     }
+
     function underlineSelection() {
-        const newEditorState = RichUtils.toggleInlineStyle(state, 'UNDERLINE');
-        dispatch(updateEditor({id: id, editor: convertToRaw(newEditorState.getCurrentContent())}))
+        if (state.current) {
+            const newEditorState = RichUtils.toggleInlineStyle(state.current, 'UNDERLINE');
+            dispatch(updateTextEditor({id: id, editor: convertToRaw(newEditorState.getCurrentContent())}))
+        }
         close()
     }
+
     function strikeSelection() {
-        const newEditorState = RichUtils.toggleInlineStyle(state, 'STRIKETHROUGH');
-        dispatch(updateEditor({id: id, editor: convertToRaw(newEditorState.getCurrentContent())}))
+        if (state.current) {
+            const newEditorState = RichUtils.toggleInlineStyle(state.current, 'STRIKETHROUGH');
+            dispatch(updateTextEditor({id: id, editor: convertToRaw(newEditorState.getCurrentContent())}))
+        }
         close()
     }
-
-
 
 
     return (
@@ -50,6 +89,25 @@ const TextEditPopUp = ({id,close}) => {
                 <u onClick={underlineSelection}>U</u>
                 <s onClick={strikeSelection}>S</s>
             </div>
+            {edst.current &&
+                <Editor textAlignment={"center"}
+                        editorState={
+                            edst.current as EditorState
+                        }
+                        placeholder={"Type something"}
+                        onChange={()=>{}}/>
+
+            }
+            {sec.current &&
+                <Editor textAlignment={"center"}
+                        editorState={
+                            sec.current as EditorState
+                        }
+                        placeholder={"Type something"}
+                        onChange={()=>{}}/>
+
+            }
+
         </ContainerPopUp>
     )
 }

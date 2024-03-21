@@ -1,5 +1,4 @@
 import {useAppDispatch} from "../../../redux/hooks";
-import {removeText, updateTextObject} from "../../../redux/Slices/textSlice";
 import RemoveObject from "../../layout/utils/RemoveObject";
 import ContainerResizeComponent from "../DndResizeRotateContainer/ContainerResizeComponent";
 import EditorComponent from "./EditorComponent";
@@ -7,6 +6,7 @@ import {useEffect} from "react";
 import EditTextPopUp from "../../layout/EditingPopUp/EditTextPopUp";
 import * as React from "react";
 import {setRectPath} from "../Shape/shapes/Rectangle";
+import {getUpdates, removeItem, updateItem} from "../../../redux/Slices/itemsSlice";
 
 const TextObject = ({text, isUsable}) => {
 
@@ -15,12 +15,14 @@ const TextObject = ({text, isUsable}) => {
 
 
     function saveChanges(object) {
-        dispatch(updateTextObject(object))
+        // console.log(object)
+        delete  object.style
+        dispatch(updateItem(getUpdates(object)))
     }
 
 
     return (
-        <RemoveObject key={text.id} removeFunc={removeText} id={text.id}>
+        <RemoveObject key={text.id} removeFunc={removeItem} id={text.id}>
 
 
             <ContainerResizeComponent
@@ -47,7 +49,7 @@ const UpdateTextPath = ({object}) => {
     const dispatch = useAppDispatch()
 
     useEffect(() => {
-        setRectPath(dispatch, object, "t" + object.id)
+        setRectPath(dispatch, object, object.id)
     }, [object.center.x, object.center.y, object.angle, object.style, object.down])
 
 }

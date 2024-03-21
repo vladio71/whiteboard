@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import ContainerPopUp from "../EditingPopUp/ContainerPopUp";
 import css from "./ObjectWithModal.module.css";
 import {IoClose} from "react-icons/io5";
-import {addLink} from '../../../redux/Slices/shapesSlice';
+import {addLink} from '../../../redux/Slices/itemsSlice';
 import {useAppDispatch} from "../../../redux/hooks";
 
 const LinkModal = ({common, id, isPresent, input, handleCloseLinkModal}) => {

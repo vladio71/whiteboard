@@ -92,7 +92,6 @@ export const OpacityHandler = ({id, name, value, setValue}) => {
         if (clientPosition < 0 || clientPosition > 1) return;
         if (value === Math.round(position / step) / 10) return;
 
-        console.log(position)
 
         setValue(Math.round((position - 12) / step) / 10)
         setToggle(!toggle)

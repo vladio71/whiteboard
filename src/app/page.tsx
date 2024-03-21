@@ -3,10 +3,10 @@ import React, {createContext, Dispatch, useEffect, useRef, useState} from "react
 import {useAppDispatch, useAppSelector} from "../redux/hooks";
 import {selectCommon, setBoardId, setBoardName, setFetchStatus, setRefreshFlag} from "../redux/Slices/commonSlice";
 import {useParams} from "next/navigation";
-import {fetchData} from "../redux/Slices/shapesSlice";
+import {fetchData} from "../redux/Slices/itemsSlice";
 import {auth} from "@/firebase/firebase";
-import {useHome} from "./hooks/useHome";
-import {useScreenMove} from "./hooks/useScreenMove";
+import {useHome} from "../hooks/useHome";
+import {useScreenMove} from "../hooks/useScreenMove";
 import LayersComponent from "../components/layout/LayersComponent";
 import CurvesCreationTool from "../components/tools/BezierCurves/CurvesCreationTool";
 import SelectionTool from "../components/tools/Selection/SelectionTool";
@@ -54,7 +54,7 @@ export default function Home() {
     useEffect(() => {
 
 
-        if (params.id !== "new" && params.id) {
+        if (params.id) {
             if (!state.common.isRefreshed && mountRef.current) {
                 dispatch(fetchData(params.id))
             }
@@ -79,22 +79,19 @@ export default function Home() {
 
 
     useEffect(() => {
-
         function saveDataBeforeUnload() {
             workerRef.current?.postMessage({
                 userId: auth?.currentUser?.uid,
                 boardId: params.id,
                 data: {
                     ...state,
-                    shape: {
-                        ...state.shape,
+                    items: {
+                        ...state.items,
                         paths: []
                     }
                 }
             });
         }
-
-
         window.addEventListener("visibilitychange", saveDataBeforeUnload)
         return () => {
             window.removeEventListener("visibilitychange", saveDataBeforeUnload)
@@ -115,24 +112,20 @@ export default function Home() {
         setZoomId,
         moveDown
     } = useHome(params.id)
-    //
-    //
-    useScreenMove(userView, option, setOption)
-    //
-    //
 
+    useScreenMove(userView, option, setOption)
 
     return (
         <>
             <div>
-                {(!isReady || !common.fetchStatus) &&
+                {(!isReady || common.isFetching) &&
                     <div className={css.boardLoader}>
                         Loading...
                         <LoaderPlaceHolder/>
                     </div>
                 }
                 <div style={{
-                    visibility: `${isReady && common.fetchStatus ? 'unset' : 'hidden'}`
+                    visibility: `${isReady && !common.isFetching ? 'unset' : 'hidden'}`
                 }} className={'back'} ref={userView} onClick={handleAddShape}>
                     <LevelContext.Provider value={{
                         setOption,

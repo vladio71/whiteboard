@@ -4,7 +4,7 @@ import * as React from "react";
 import ContainerPopUp from "../EditingPopUp/ContainerPopUp";
 import {OpacityHandler} from "../EditingPopUp/EditColors/helpers";
 import Colors, {ColorPicker} from "../EditingPopUp/EditColors/ColorPicker";
-import {addStyle} from "../../../redux/Slices/drawingSlice"
+import { setDrawingStyle} from "../../../redux/Slices/itemsSlice"
 import {useAppDispatch} from "../../../redux/hooks";
 import {PopUpWithColorPicker} from "../EditingPopUp/EditColors/BackgroundPopUp";
 // import Colors from "../EditingPopUp/EditColors/ColorPicker";
@@ -20,7 +20,7 @@ const ColorCircle = ({id, open, color, isSelected, setOpen}) => {
 
     useEffect(() => {
         if (isSelected === id && thickness !== undefined)
-            dispatch(addStyle({
+            dispatch(setDrawingStyle({
                 id,
                 style: {
                     color: color.color,
@@ -54,7 +54,7 @@ const ColorCircle = ({id, open, color, isSelected, setOpen}) => {
                             name={'color'}
                             top={'3rem'}
                             height={'245px'}
-                            addStyle={addStyle}
+                            addStyle={setDrawingStyle}
                             category={'drawing'}>
                             <OpacityHandler id={id} value={thickness} setValue={setThickness} name={"Thickness"}/>
                         </PopUpWithColorPicker>

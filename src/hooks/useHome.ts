@@ -1,6 +1,6 @@
-import {useAppDispatch, useAppSelector} from "../../redux/hooks";
+import {useAppDispatch, useAppSelector} from "../redux/hooks";
 import {useEffect, useRef, useState} from "react";
-import {addShape, removeShape, selectShapes, setWhiteboardData} from "../../redux/Slices/shapesSlice";
+import {addItem, removeItem, selectPaths, selectItems, setWhiteboardData} from "../redux/Slices/itemsSlice";
 import {convertToRaw, EditorState} from "draft-js";
 import {
     updateHeight,
@@ -8,14 +8,16 @@ import {
     updateScroll,
     selectCommon,
     setFetchStatus
-} from "../../redux/Slices/commonSlice";
+} from "../redux/Slices/commonSlice";
 import * as React from "react";
-import {Point} from "../page";
-import {setAllData, addNewBoard, auth} from "../../firebase/firebase";
+import {Point} from "../app/page";
+import {setAllData, addNewBoard, auth} from "@/firebase/firebase";
 import {useRouter} from "next/navigation";
 import {clearInterval, clearTimeout, setInterval, setTimeout} from "timers";
-import {debounce} from "app/utils/utils";
-import {store} from "../../redux/store";
+import {debounce} from "utils/utils";
+import {store} from "../redux/store";
+import {convertToHTML} from 'draft-convert'
+import {v4 as uuidv4} from 'uuid';
 
 
 export const useHome = (boardId) => {
@@ -55,7 +57,7 @@ export const useHome = (boardId) => {
 
     const scale = [0.5, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 2]
 
-    const shapes = useAppSelector(selectShapes)
+    const shapes = useAppSelector(selectItems)
 
 
     useEffect(() => {
@@ -65,19 +67,15 @@ export const useHome = (boardId) => {
             const y = window.innerHeight
             if (userView.current !== null) {
                 setTimeout(() => {
-                    const paths = store.getState().present.shape.paths.slice(0, 10)
-                    console.log(paths)
+
+                    const paths = selectPaths(store.getState()).slice(0, 10)
                     if (paths.length > 0) {
                         let path = paths.reduce((a, b) => {
                             let start = (a.center || a)
-                            console.log({x: (start.x + b.center.x) / 2, y: (start.y + b.center.y) / 2})
                             return {x: (start.x + b.center.x) / 2, y: (start.y + b.center.y) / 2}
                         })
                         if (paths.length === 1)
                             path = paths[0].center
-                        console.log(path.x - x * .5, path.y - y * .5)
-                        console.log(path)
-                        console.log(x * 1.5, y * 1.5)
 
                         userView.current.scrollTo(path.x - x * .5, path.y - y * .5)
                     } else {
@@ -248,21 +246,23 @@ export const useHome = (boardId) => {
 
     function handleRemoveShape(e, id) {
         if (e.key === "Backspace" || e.key === "Delete") {
-            dispatch(removeShape(id))
+            dispatch(removeItem(id))
         }
 
     }
 
     function handleAddShape(e) {
         if (shape === '') return
-        dispatch(addShape({
+        dispatch(addItem({
+            id: uuidv4(),
             shape: shape,
             x: (e.clientX + common.scrollX) / common.scale as number,
             y: (e.clientY + common.scrollY) / common.scale as number,
             w: 130,
             h: 130,
             style: {borderThickness: 0.1},
-            editor: convertToRaw(EditorState.createEmpty().getCurrentContent())
+            editor: convertToRaw(EditorState.createEmpty().getCurrentContent()),
+            creationTime: Date.now()
         }))
         setShape('')
         setOption('Selection')
