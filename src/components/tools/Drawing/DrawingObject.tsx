@@ -7,7 +7,7 @@ import {drawPoints, getLineWidth, midPointBtw} from "./useDrawing";
 import {getUpdates, removeItem, updateItem} from "redux/Slices/itemsSlice";
 
 
-const DrawingObject = ({drawing, isUsable}) => {
+const DrawingObject = ({drawing}) => {
 
     const dispatch = useAppDispatch()
 
@@ -19,7 +19,6 @@ const DrawingObject = ({drawing, isUsable}) => {
     return (
         <RemoveObject key={drawing.id} removeFunc={removeItem} id={drawing.id}>
             <ContainerResizeComponent
-                isUsable={isUsable}
                 editorObject={drawing}
                 saveChanges={saveChangesDrawing}
                 renderProp={(object) => <DrawingImage object={object}/>}
@@ -40,10 +39,10 @@ const DrawingImage = ({object}) => {
     useEffect(() => {
         const canvas: HTMLCanvasElement = canvasRef.current
         const ctx: CanvasRenderingContext2D = canvas.getContext('2d')
-        const scaleX = object.w / object.startW
-        const scaleY = object.h / object.startH
-        canvas.width = (object.w + 15) * (common.scale) + 100
-        canvas.height = (object.h + 15) * (common.scale) + 100
+        const scaleX = (object.w +20)/ (object.startW+20)
+        const scaleY = (object.h +20)/ (object.startH+20)
+        canvas.width = (object.w + 20) * (common.scale)
+        canvas.height = (object.h + 20) * (common.scale)
         ctx.lineJoin = 'round'
         ctx.lineCap = "round";
 
@@ -61,15 +60,15 @@ const DrawingImage = ({object}) => {
 
     const urlImageStyle = {
         position: "absolute",
-        left: 50,
-        top: 50,
+        left: 90,
+        top: 90,
     }
 
     return (
         <>
             <div style={urlImageStyle}>
                 <canvas style={{
-                    transform: `rotate(${object.angle}deg)`
+                    // transform: `rotate(${object.angle}deg)`
                 }} ref={canvasRef}></canvas>
             </div>
 

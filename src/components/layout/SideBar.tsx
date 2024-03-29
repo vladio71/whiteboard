@@ -8,29 +8,25 @@ import {LuMousePointer2} from "react-icons/lu";
 import ChoseShapePopUp from "./SideBarPopUps/ChoseShapePopUp";
 import DrawingPopUp from "./SideBarPopUps/DrawingPopUp";
 import CaptionOnHover from "./utils/CaptionOnHover";
-// import {selectCurves} from "../../redux/Slices/curvesSlice";
-// import {addItem} from "../../redux/Slices/curvesSlice";
 import {
     updateItems,
     saveObjectInfo,
     addItem,
     selectItems,
     getUpdates,
-    selectDrawings, setAllItems
+    setAllItems
 } from "../../redux/Slices/itemsSlice";
 import {useAppDispatch, useAppSelector} from "../../redux/hooks";
 import {BiText} from "react-icons/bi";
 import {ActionCreators} from 'redux-undo';
 import {IoReturnDownBack, IoReturnUpForwardOutline} from "react-icons/io5";
-import {Point} from "../../app/page";
-import {preventTools} from "utils/utils";
-import {selectCommon} from "redux/Slices/commonSlice";
+import {selectCommon, updateTool} from "redux/Slices/commonSlice";
 import {moveCurve} from "../tools/BezierCurves/utils";
-import {ChromePicker} from "react-color";
 import {v4 as uuidv4} from 'uuid';
+import {Point} from "../../types/types";
 
 
-const SideBar = memo(({setShape, setOption, option}) => {
+const SideBar = memo(({setShape}) => {
 
     const dispatch = useAppDispatch()
 
@@ -38,13 +34,10 @@ const SideBar = memo(({setShape, setOption, option}) => {
     const popUps = useRef(null)
     const [selected, setSelected] = useState(1)
     const [toggle, setToggle] = useState(false)
-    // const [mousePosition, setMousePosition] = useState<Point>({x: 0, y: 0})
     const [caption, setCaption] = useState('')
-    const drawings = useAppSelector(selectDrawings)
-    // const curves = useAppSelector(selectCurves)
     const shapes = useAppSelector(selectItems)
-    // const texts = useAppSelector(selectTexts)
     const common = useAppSelector(selectCommon)
+    const option = common.tool
     const savedObject = useAppSelector(state => state.present.items.savedObject.saved)
     const toolbarRef = useRef(null)
     const bottomRef = useRef(null)
@@ -67,15 +60,7 @@ const SideBar = memo(({setShape, setOption, option}) => {
             }
         }
 
-
         window.addEventListener('mousemove', saveMousePosition)
-
-        if (toolbarRef.current) {
-            // toolbarRef.current.addEventListener('mouseup', preventTools)//FOUND BUG
-            // toolbarRef.current.addEventListener('mousedown', preventTools)
-        }
-
-
         return () => {
             window.removeEventListener('mousemove', saveMousePosition)
         }
@@ -115,7 +100,6 @@ const SideBar = memo(({setShape, setOption, option}) => {
 
 
     function handleKeyDown(e) {
-
         if (e.code === "KeyZ" && e.ctrlKey && e.shiftKey) {
             e.preventDefault()
             e.stopPropagation()
@@ -168,7 +152,7 @@ const SideBar = memo(({setShape, setOption, option}) => {
 
         if (e.code === 'KeyA' && e.altKey) {
             setOpen('')
-            setOption("Selection")
+            dispatch(updateTool("Selection"))
             dispatch(updateItems(getUpdates(shapes.map(el => {
                 return {...el, selected: true}
             }))))
@@ -178,14 +162,14 @@ const SideBar = memo(({setShape, setOption, option}) => {
         if (e.code === 'KeyV') {
             setOpen('')
             if (option === 'Selection') {
-                setOption('Move')
+                dispatch(updateTool('Move'))
             } else {
-                setOption('Selection')
+                dispatch(updateTool('Selection'))
             }
         }
         if (e.code === 'KeyT') {
             setOpen('')
-            setOption("Text")
+            dispatch(updateTool("Text"))
         }
         if (e.code === 'KeyD') {
             if (open !== 'Drawing') {
@@ -193,7 +177,7 @@ const SideBar = memo(({setShape, setOption, option}) => {
             } else {
                 setOpen('')
             }
-            setOption("Drawing")
+            dispatch(updateTool("Drawing"))
         }
         if (e.code === 'KeyS') {
             if (open !== 'Shape') {
@@ -201,15 +185,14 @@ const SideBar = memo(({setShape, setOption, option}) => {
             } else {
                 setOpen('')
             }
-            setOption("Shape")
+            dispatch(updateTool("Shape"))
         }
         if (e.code === 'KeyC' && !e.ctrlKey) {
             setOpen('')
-            setOption("Curve")
+            dispatch(updateTool("Curve"))
         }
 
     }
-
 
     function handleOpenPopUp(name) {
         if (open === name) {
@@ -243,9 +226,9 @@ const SideBar = memo(({setShape, setOption, option}) => {
                          onMouseLeave={handleLeave}
                          onClick={() => {
                              if (option === 'Selection') {
-                                 setOption('Move')
+                                 dispatch(updateTool('Move'))
                              } else {
-                                 setOption('Selection')
+                                 dispatch(updateTool('Selection'))
                              }
                              setOpen('')
                          }}>
@@ -258,7 +241,7 @@ const SideBar = memo(({setShape, setOption, option}) => {
                          onMouseEnter={() => handleEnter('Drawing')}
                          onMouseLeave={handleLeave}
                          onClick={() => {
-                             setOption('Drawing')
+                             dispatch(updateTool('Drawing'))
                              handleOpenPopUp('Drawing')
                          }}>
                         {caption === 'Drawing' && open === '' &&
@@ -270,7 +253,7 @@ const SideBar = memo(({setShape, setOption, option}) => {
                          onMouseEnter={() => handleEnter('Text')}
                          onMouseLeave={handleLeave}
                          onClick={() => {
-                             setOption('Text')
+                             dispatch(updateTool('Text'))
                              handleOpenPopUp('Text')
                          }}>
                         {caption === 'Text' && open === '' &&
@@ -282,7 +265,7 @@ const SideBar = memo(({setShape, setOption, option}) => {
                          onMouseEnter={() => handleEnter('Shape')}
                          onMouseLeave={handleLeave}
                          onClick={() => {
-                             setOption("Shape")
+                             dispatch(updateTool("Shape"))
                              handleOpenPopUp('Shape')
                          }}>
                         {caption === 'Shape' && open === '' &&
@@ -294,7 +277,7 @@ const SideBar = memo(({setShape, setOption, option}) => {
                          onMouseEnter={() => handleEnter('Curve')}
                          onMouseLeave={handleLeave}
                          onClick={() => {
-                             setOption('Curve')
+                             dispatch(updateTool('Curve'))
                              setOpen('')
                          }}>
                         {caption === 'Curve' && open === '' &&
@@ -331,7 +314,7 @@ const SideBar = memo(({setShape, setOption, option}) => {
                          onMouseLeave={handleLeave}
                          onClick={(e) => {
                              e.preventDefault()
-                             setOption("Selection")
+                             dispatch(updateTool("Selection"))
                              dispatch(ActionCreators.redo())
                              setOpen('')
                          }}>
@@ -346,7 +329,7 @@ const SideBar = memo(({setShape, setOption, option}) => {
                          onMouseLeave={handleLeave}
                          onClick={(e) => {
                              e.preventDefault()
-                             setOption("Selection")
+                             dispatch(updateTool("Selection"))
                              dispatch(ActionCreators.undo())
                              setOpen('')
                          }}>

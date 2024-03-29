@@ -29,7 +29,7 @@ const SelectShape = ({id}) => {
                 <IoEllipseOutline/>
             </div>
         </div>,
-        "Circle": <IoEllipseOutline/>,
+        // "Circle": <IoEllipseOutline/>,
         "Triangle": <BsTriangle/>,
         "RoundRect": <BiRectangle/>,
 

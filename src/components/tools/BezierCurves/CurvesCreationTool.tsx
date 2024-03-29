@@ -1,36 +1,32 @@
-import React, {useContext, useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
-// import {selectCurves} from "../../../redux/Slices/curvesSlice"
-import {LevelContext} from "../../../app/page";
-import {selectCommon} from "redux/Slices/commonSlice";
+import {selectCommon, updateStartPoint, updateTool} from "redux/Slices/commonSlice";
 import {addItem} from "../../../redux/Slices/itemsSlice";
 import {v4 as uuidv4} from 'uuid';
+import {batchGroupBy} from "../../../utils/batchGroupBy";
 
 
-const CurvesCreationTool = ({add, setShape, isUsable}) => {
+const CurvesCreationTool = () => {
 
     const dispatch = useAppDispatch()
 
-    const level = useContext(LevelContext)
 
     const [down, setDown] = useState(false)
     const [end, setEnd] = useState(false)
-    const [curvePath, setCurvePath] = useState({})
-    // const [start, setStart] = useState({x: 0, y: 0})
     const start = useRef({x: 0, y: 0})
     const setStart = (data) => {
         start.current = data
     }
     const refAdding = useRef(null)
-    // const curves = useAppSelector(selectCurves)
     const common = useAppSelector(selectCommon)
+    const {startPoint: startAttachedPoint, shapeId: attachedShapeId} = common
     const curveRef = useRef({})
-
+    const add = common.tool === "Curve"
 
     useEffect(() => {
-        setStart(level?.start)
+        setStart(startAttachedPoint)
         handleDown(null)
-    }, [level?.start])
+    }, [startAttachedPoint])
 
     useEffect(() => {
 
@@ -56,12 +52,8 @@ const CurvesCreationTool = ({add, setShape, isUsable}) => {
 
 
             setStart({
-                // x: (e.clientX + common.scrollX) / common.scale - change,
-                // y: (e.clientY + common.scrollY) / common.scale - change
                 x: (e.clientX + common.scrollX) / common.scale,
                 y: (e.clientY + common.scrollY) / common.scale
-                // x: e.clientX,
-                // y: e.clientY
             })
         }
 
@@ -71,16 +63,18 @@ const CurvesCreationTool = ({add, setShape, isUsable}) => {
                 handleMove(e)
             }
 
+            const id = uuidv4()
+            batchGroupBy.start(id)
             dispatch(addItem({
                 ...curveRef.current,
-                shapeIndex: e === null ? level?.shapeId : -1,
+                shapeIndex: e === null ? attachedShapeId : -1,
                 new: true,
-                id: uuidv4()
+                id: id
             }))
-            setShape('Selection')
+            dispatch(updateTool('Selection'))
             setDown(false)
             setEnd(!end)
-            level?.setStart({x: 0, y: 0})
+            dispatch(updateStartPoint({x: 0, y: 0}))
             curveRef.current = {}
             setTimeout(() => {
                 const canvas = refAdding.current
@@ -146,7 +140,6 @@ const CurvesCreationTool = ({add, setShape, isUsable}) => {
             angle: endingAngle,
             points: [start.current, end],
         }
-
 
     }
 

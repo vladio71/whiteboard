@@ -1,10 +1,10 @@
 import React, {useEffect, useRef, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
 import {useDrawing} from "./useDrawing";
-import { selectDrawingStyle} from "redux/Slices/itemsSlice";
+import {selectDrawingStyle} from "redux/Slices/itemsSlice";
 import {selectCommon} from "redux/Slices/commonSlice";
 
-const DrawingTool = ({isUsed}) => {
+const DrawingTool = () => {
 
 
     const [ctx, setContext] = useState()
@@ -13,11 +13,11 @@ const DrawingTool = ({isUsed}) => {
 
     const canvasRef = useRef()
     const hiddenCanvasRef = useRef()
-    // const drawings = useAppSelector(selectDrawings)
     const brush = useAppSelector(state => state.present.items.brush)
     const common = useAppSelector(selectCommon)
     const drawingStyle = useAppSelector(state => selectDrawingStyle(state))
     const [delayedDown, setDelayedDown] = useState(false)
+    const isUsed = common.tool === "Drawing"
 
 
     const {
@@ -57,7 +57,7 @@ const DrawingTool = ({isUsed}) => {
 
     const style = {
         position: "fixed",
-        display: delayedDown ? "block" : 'none',
+        display: down ? "block" : 'none',
         zIndex: 10,
     }
 

@@ -19,7 +19,6 @@ const RemoveObject = ({removeFunc, id, children}: {
 
     }
 
-
     return (
         <div tabIndex={1} onKeyDown={handleRemove}>
             {children}

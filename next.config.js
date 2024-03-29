@@ -1,20 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: false,
-
     eslint: {
         ignoreDuringBuilds: true,
     },
     typescript: {
         ignoreBuildErrors: true,
     },
-    // basePath: '/src',
     images: {
         domains: ['r4.wallpaperflare.com', "ucarecdn.com"],
     },
     experimental: {
-        // esmExternals: false,
-        // windowHistorySupport: true,
         optimizePackageImports: ['react-icons'],
     },
     modularizeImports: {

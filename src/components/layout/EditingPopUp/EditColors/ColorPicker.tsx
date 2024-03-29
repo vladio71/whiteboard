@@ -12,13 +12,13 @@ const Colors = ({id, name, category = 'shapes', addStyle, children}) => {
     const dispatch = useAppDispatch()
     const [selected, setSelected] = useState(0)
     const [colors, setColors] = useState(['transparent', 'white', 'red', 'orange', 'black', 'green', 'yellow', 'blue'])
-    const colorsState = useAppSelector(state => selectStyles(state, id, category)?.colors)
-
-
-    useEffect(() => {
-        if (colorsState)
-            setColors(colorsState)
-    }, [colorsState])
+    // const colorsState = useAppSelector(state => selectStyles(state, id, category)?.colors)
+    //
+    //
+    // useEffect(() => {
+    //     if (colorsState)
+    //         setColors(colorsState)
+    // }, [colorsState])
 
 
 

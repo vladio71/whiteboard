@@ -9,14 +9,13 @@ import {LineType} from "../../../layout/EditingPopUp/EditColors/BorderPopUp";
 const TypePopUp = ({id}) => {
 
     const dispatch = useAppDispatch()
-    const style = useAppSelector(state => selectStyles(state,id, "curves"))
+    const style = useAppSelector(state => selectStyles(state, id, "curves"))
+
+    const [thickness, setThickness] = useState(style?.thickness ? style.thickness : .1)
 
 
-    const [thickness, setThickness] = useState( style.thickness? style.thickness:.1)
-
-
-    useEffect(()=>{
-        dispatch(addStyle({ id, style: {'thickness': thickness}}))
+    useEffect(() => {
+        dispatch(addStyle({id, style: {'thickness': thickness}}))
     }, [thickness])
 
 

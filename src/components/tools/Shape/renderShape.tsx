@@ -15,9 +15,9 @@ export const renderSwitch = (item) => {
         case 'Rhombus':
             return <Rhombus item={item}/>
             break;
-        case 'Circle':
-            return <Circle item={item}/>
-            break;
+        // case 'Circle':
+        //     return <Circle item={item}/>
+        //     break;
         case 'Ellipse':
             return <Ellipse item={item}/>
             break;

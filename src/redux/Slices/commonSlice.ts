@@ -1,7 +1,5 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit'
-import {addLink, fetchData, getId, setWhiteboardData} from "./itemsSlice";
-import {ActionCreators} from 'redux-undo';
-import {auth, getData} from "@/firebase/firebase";
+import { createSlice} from '@reduxjs/toolkit'
+import { fetchData, setWhiteboardData} from "./itemsSlice";
 
 const initialState = {
     scrollX: 0,
@@ -17,7 +15,13 @@ const initialState = {
     boardName: null,
     isRefreshed: false,
     cardUrl: null,
-    theme: "light"
+    theme: "light",
+    zoomId: 4,
+    tool: "Move",
+    startPoint: {x:0, y: 0},
+    shapeId: -1,
+    underneathElementId: null
+
 }
 
 
@@ -28,6 +32,18 @@ export const CommonSlice = createSlice({
         updateScroll: (state, action) => {
             state.scrollX = action.payload.x
             state.scrollY = action.payload.y
+        },
+        updateZoom: (state, action) => {
+            state.zoomId = action.payload
+        },
+        updateTool: (state, action) => {
+            state.tool = action.payload
+        },
+        updateShapeId: (state, action) => {
+            state.shapeId = action.payload
+        },
+        updateStartPoint: (state, action) => {
+            state.startPoint = action.payload
         },
         updateHeight: (state, action) => {
             state.h = action.payload.h
@@ -60,6 +76,9 @@ export const CommonSlice = createSlice({
         },
         setItemsIdsOrder: (state, action) => {
             state.itemsIdsOrder = [...action.payload]
+        },
+        updateUnderneathElementId: (state, action) => {
+            state.underneathElementId = action.payload
         },
 
 
@@ -107,10 +126,14 @@ export const {
     setBoardId,
     setAuthStatus,
     setBoardName,
-    setItemsIdsOrder,
+    updateZoom,
+    updateTool,
+    updateShapeId,
+    updateStartPoint,
     setRefreshFlag,
     setFetchStatus,
-    updateTheme
+    updateTheme,
+    updateUnderneathElementId
 } = CommonSlice.actions
 
 

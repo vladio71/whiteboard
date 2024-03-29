@@ -8,14 +8,13 @@ import * as React from "react";
 import {setRectPath} from "../Shape/shapes/Rectangle";
 import {getUpdates, removeItem, updateItem} from "../../../redux/Slices/itemsSlice";
 
-const TextObject = ({text, isUsable}) => {
+const TextObject = ({text}) => {
 
 
     const dispatch = useAppDispatch()
 
 
     function saveChanges(object) {
-        // console.log(object)
         delete  object.style
         dispatch(updateItem(getUpdates(object)))
     }
@@ -27,7 +26,6 @@ const TextObject = ({text, isUsable}) => {
 
             <ContainerResizeComponent
                 id={text.id}
-                isUsable={isUsable}
                 editorObject={text}
                 saveChanges={saveChanges}
                 popUp={(object) =>

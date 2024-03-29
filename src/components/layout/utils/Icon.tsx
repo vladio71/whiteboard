@@ -6,7 +6,6 @@ const Icon = ({icon, st}) => {
         width: '20px',
         height: '20px',
         margin: '2px auto'
-        // display: "inline-block",
     }
 
 

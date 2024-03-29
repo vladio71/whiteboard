@@ -4,12 +4,14 @@ import {convertToRaw, EditorState} from "draft-js";
 import {addItem} from "redux/Slices/itemsSlice";
 import {v4 as uuidv4} from 'uuid';
 import * as React from "react";
+import {updateTool} from "../../../redux/Slices/commonSlice";
 
 
-const TextCreationTool = ({isUsed, setOption}) => {
+const TextCreationTool = () => {
 
     const dispatch = useAppDispatch()
     const common = useAppSelector(state => state.present.common)
+    const isUsed = common.tool === "Text"
 
 
     useEffect(() => {
@@ -33,7 +35,7 @@ const TextCreationTool = ({isUsed, setOption}) => {
                 creationTime: Date.now()
             }
         ))
-        setOption('Selection')
+        dispatch(updateTool('Selection'))
     }
 
 

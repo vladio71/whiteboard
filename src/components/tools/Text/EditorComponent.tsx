@@ -1,7 +1,5 @@
-import React, {useRef, useEffect, useContext, useState,} from 'react';
-import Draft, {
-    ContentState,
-    convertFromHTML,
+import React, {useRef, useEffect, useState,} from 'react';
+import {
     convertFromRaw,
     convertToRaw,
     Editor,
@@ -10,11 +8,8 @@ import Draft, {
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
-import {updateEditor} from '../../../redux/Slices/shapesSlice'
 import {selectItem, updateTextEditor} from "../../../redux/Slices/itemsSlice";
-import {ObjectContext} from "../DndResizeRotateContainer/ContainerResizeComponent";
 import useClickOutside from "../../../hooks/useClickOutside";
-import {convertToHTML} from 'draft-convert'
 
 
 function EditorComponent({id, style, object, category = 'shape'}) {
@@ -22,19 +17,16 @@ function EditorComponent({id, style, object, category = 'shape'}) {
     const dispatch = useAppDispatch()
     const element = useAppSelector(state => selectItem(state, id))
     const common = useAppSelector(state => state.present.common)
-    // const state = EditorState.createWithContent(convertFromRaw(element.editor))
     const shapeStyle = element?.style
     const containerRef = useRef<React.ReactNode>(null)
     const edStateRef = useRef(EditorState.createWithContent(convertFromRaw(element.editor)))
     const insideRef = useRef(false)
     const [toggle, setToggle] = useState(false)
     const mountRef = useRef(true)
-    // const controlKeyDownRef = useRef(false)
 
 
     // useEffect(()=>{
     //     // edStateRef.current = EditorState.createWithContent(convertFromRaw(element.editor))
-    //     console.log('wtf')
     // },[element.editor])
 
     useEffect(() => {
@@ -63,20 +55,65 @@ function EditorComponent({id, style, object, category = 'shape'}) {
         insideRef.current = false
     })
 
+    function getWidth(shape) {
+        switch (shape) {
+            case "Ellipse":
+                return {
+                    width: '80%',
+                    height: '60%'
+                }
+            case "Triangle":
+                return {
+                    width: '55%',
+                    height: '40%',
+                    transform: 'translate(-50%, 10%)',
+                }
+            case "Rhombus":
+                return {
+                    width: '70%',
+                    height: '30%'
+                }
+            case "Parallelogram":
+                return {
+                    width: '60%',
+                    height: '100%'
+                }
+            default:
+                return {
+                    width: object?.w ? 'calc(100% - 20px)' : category === "shape" ? '60%' : '100%'
+                }
+
+        }
+    }
+
+    function getMaxHeight(shape) {
+        switch (shape) {
+            case "Ellipse":
+                return object.h * .6
+            case "Triangle":
+                return object.h * .4
+            case "Rhombus":
+                return object.h * .3
+            default:
+                return object?.h ? object.h - 20 : '200px'
+
+        }
+    }
 
     const styles = {
         root: {
             fontFamily: shapeStyle?.fontFamily ? shapeStyle?.fontFamily : '\'Helvetica\', sans-serif',
             overflow: 'clip',
             position: 'absolute',
-            left: '10px',
+            left: '50%',
             top: '50%',
-            transform: 'translateY(-50%)',
+            transform: 'translate(-50%,-50%)',
             display: 'flex',
             alignItems: 'center',
             height: '100%',
             maxHeight: object?.h ? object.h - 20 : '200px',
-            width: object?.w ? 'calc(100% - 20px)' : category === "shape" ? '60%' : '100%',
+            ...getWidth(object?.shape)
+
         },
         editor: {
             cursor: 'text',
@@ -86,7 +123,7 @@ function EditorComponent({id, style, object, category = 'shape'}) {
             position: 'fixed',
             overflow: 'hidden',
             width: '100%',
-            maxHeight: object?.h ? object.h - 20 : '200px',
+            maxHeight: getMaxHeight(object?.shape),
             height: 'fit-content',
             textAlign: 'center',
             padding: 10,
@@ -103,10 +140,8 @@ function EditorComponent({id, style, object, category = 'shape'}) {
 
 
 
-
     function updateState(editorState) {
         edStateRef.current = editorState
-        console.log(editorState.getSelection())
         const selection = editorState.getSelection()
         const selectionState = {
             focusOffset: selection.focusOffset,
@@ -163,7 +198,7 @@ function EditorComponent({id, style, object, category = 'shape'}) {
              tabIndex={0}
              ref={containerRef}
              onKeyDown={preventEditorPropagation}
-             // onClick={() => setToggle(false)}
+            // onClick={() => setToggle(false)}
         >
             <div style={{...styles.editor}}
                  onClick={object.editMode ? handleAddFocus : null}

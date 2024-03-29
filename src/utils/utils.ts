@@ -15,6 +15,22 @@ export function debounce(cb: Function, delay: number) {
 
 }
 
+export function throttle(cb: Function, delay: number) {
+    let timer = false
+    return (...args) => {
+        if (timer) return
+        timer = true
+        cb(...args)
+
+        setTimeout(() => {
+            timer = false
+        }, delay)
+    }
+}
+
+
+
+
 export function ThrottledDebounce(fn, threshold) {
     threshold = threshold || 10;
     var last, deferTimer;
@@ -46,4 +62,8 @@ export function preventTools(e) {
 export function checkPopUpPosition(obj, topPosition,) {
     const common = useAppSelector(selectCommon)
     return obj?.y > 160 + common.scrollY ? topPosition : obj?.h + 100
+}
+
+export function getDistance(p1, p2) {
+    return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2))
 }

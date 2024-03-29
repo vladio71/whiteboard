@@ -153,7 +153,6 @@ export const itemsSlice = createSlice({
         addLink: (state, action) => {
             const {id, link} = action.payload;
             const item = state.entities[id];
-            console.log(item)
             if (item)
                 item.link = link
         },
@@ -222,7 +221,8 @@ const globalizedPathsSelectors = itemsAdapter.getSelectors((state) => state.pres
 export const selectItems = (state) => globalizedItemSelectors.selectAll(state)
 export const selectPaths = (state) => globalizedPathsSelectors.selectAll(state)
 
-export function selectStyles(state, id, category = "shapes") {
+export function selectStyles(state, id) {
+
     return globalizedItemSelectors.selectById(state, id).style
 }
 
@@ -240,7 +240,7 @@ export function selectDrawingStyle(state) {
 }
 
 export function selectDrawings(state) {
-    selectItems(state).filter(el => el?.drawing)
+    return selectItems(state).filter(el => el?.drawing)
 }
 
 

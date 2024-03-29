@@ -23,6 +23,7 @@ const CurvePopUp = ({curve}) => {
 
     return (
         <div className={`${css.container} rad-shadow`}
+             // data-popup={true}
              style={{top: checkPopUpPosition(curve.borders, '-4rem')}}
              onMouseDown={e => {
                  e.stopPropagation()

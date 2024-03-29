@@ -34,14 +34,6 @@ const TextEditPopUp = ({id, close}) => {
 
 
     }, [item?.editor, item?.selectionState])
-    //
-    // const selectionState = state.getSelection()
-    // const updatedSelection = selectionState.merge({
-    //     focusOffset: 0,
-    //     anchorOffset: 20,
-    // });
-
-    // dispatch(updateEditor({id: id, editor: convertToRaw(newEditorState.getCurrentContent())}))
 
 
     function boldSelection(e) {
@@ -51,7 +43,7 @@ const TextEditPopUp = ({id, close}) => {
             const newEditorState = RichUtils.toggleInlineStyle(state.current, 'BOLD');
             dispatch(updateTextEditor({id: id,  editor: convertToRaw(newEditorState.getCurrentContent())}))
         }
-        // close()
+        close()
 
     }
 

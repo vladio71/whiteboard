@@ -14,7 +14,7 @@ const ChoseShapePopUp = ({setShape, setOpen}) => {
 
     return (
         <div className={css.popUpPosition}>
-            <ContainerPopUp height={'8rem'} width={'8rem'} colors={true} isBottomPositioned={false}>
+            <ContainerPopUp height={'5rem'} width={'8rem'} colors={true} isBottomPositioned={false}>
                 <div className={css.popUp}
                     style={{
                         margin: '.7rem'
@@ -55,12 +55,12 @@ const ChoseShapePopUp = ({setShape, setOpen}) => {
                         </div>
 
                     </div>
-                    <div className={css.item} onClick={() => {
-                        setShape("Circle")
-                        setOpen(false)
-                    }}>
-                        <IoEllipseOutline/>
-                    </div>
+                    {/*<div className={css.item} onClick={() => {*/}
+                    {/*    setShape("Circle")*/}
+                    {/*    setOpen(false)*/}
+                    {/*}}>*/}
+                    {/*    <IoEllipseOutline/>*/}
+                    {/*</div>*/}
                     <div className={css.item} onClick={() => {
                         setShape("Triangle")
                         setOpen(false)

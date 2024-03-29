@@ -1,6 +1,11 @@
 import {useEffect, useRef, useState} from "react";
 import {getPointOnCurve} from "./CurvesCreationTool";
-import {setEditStatus, setItem, setShapeIndices, updateItem, updateWithNoUndo} from "../../../redux/Slices/itemsSlice";
+import {
+    removeItem,
+    setEditStatus,
+    setShapeIndices,
+    updateItem,
+} from "../../../redux/Slices/itemsSlice";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
 import {
     getUpdates,
@@ -15,20 +20,17 @@ import {
     AlignCurveToNearestPoint,
     AlignPointToObjectBorder,
     bezier,
-    calculatePoints,
-    drawArrow,
     getCurveArrowAngle,
     getAdditionalPoint,
     getDefaultBezierControlPoints,
     getPoints,
-    makeHightOrderCurvePath,
-    moveCurve
+    moveCurve, calculatePointsForCurve
 } from "./utils";
 import useClickOutside from "../../../hooks/useClickOutside";
 import {checkForBorders} from "../Drawing/useDrawing";
 import useRefState from "../../../hooks/useRefState";
 import {batchGroupBy} from "../../../utils/batchGroupBy";
-import {getIsUndoAction, getLastAction} from "../../../redux/middleware/getLastAction";
+import {getIsUndoAction} from "../../../redux/middleware/getLastAction";
 
 
 export function useCurve(curve, ref, sample, setSample, container, isUsable, borders) {
@@ -39,25 +41,11 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
 
 
     useEffect(() => {
-        const pointsForRender = getPoints(sample.current.points).map(p => {
-            return {
-                x: p.x,
-                y: p.y
-            }
-        })
-        if (sample.current.points.length > 2) {
-            const {addPoints, points} = calculatePoints(pointsForRender)
-            setAddPoints(addPoints)
-            setPoints(points)
-            setUpdate(!update)
-        } else {
-            setPoints(pointsForRender)
-            const start = pointsForRender[0]
-            const end = pointsForRender[sample.current.points.length - 1]
-            const {cp1, cp2} = getDefaultBezierControlPoints(start, end)
-            setAddPoints([getPointOnCurve(start, cp1, cp2, end, 0.5)])
-            setUpdate(!update)
-        }
+        const pointsForRender = getPoints(sample.current.points)
+        const {addPoints, points} = calculatePointsForCurve(pointsForRender)
+        setAddPoints(addPoints)
+        setPoints(points)
+        setUpdate(!update)
     }, [sample.current, common.scale])
 
 
@@ -69,6 +57,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
     const [isAttached, setIsAttached] = useRefState(false)
     const [isAttachedBack, setIsAttachedBack] = useRefState(false)
     const [down, setDown] = useState(curve?.new)
+    const [isFollowingShape, setIsFollowingShape] = useState(false)
     // const [editPoint, setEditPoint] = useState(1)
     const [editPoint, setEditPoint] = useState(!curve?.new ? null : 1)
     const [replacePoint, setReplace] = useState({x: 0, y: 0})
@@ -93,7 +82,12 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
 
 
     useEffect(() => {
-        if (shapeEndPath?.shape && mountedRef.current !== 0) {
+        console.log('asd')
+        console.log(shapeEndPath)
+        console.log(shapeStartPath)
+        console.log(shapeEndPath?.shape && mountedRef.current !== 0)
+        if (mountedRef.current !== 0) {
+            console.log(shapeEndPath)
             if (shapeEndPath) {
                 shapeChangeHandle(shapeEndPath, sample.current.points[0])
             }
@@ -108,19 +102,20 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
         if (down) {
             dispatch(setEditStatus(true))
         }
-        dispatch(updateItem(getUpdates({
-            ...sample.current,
-            new: false
-        })))
+        if (!getIsUndoAction())
+            dispatch(updateItem(getUpdates({
+                ...sample.current,
+                new: false
+            })))
         setSample({
             ...sample.current,
-           new: false
+            new: false
         })
         if (curve.shapeIndex !== -1)
-            setIsAttached(true)
+            setIsAttachedBack(true)
 
         if (curve?.shapeIndexStart && curve.shapeIndexStart !== -1)
-            setIsAttachedBack(true)
+            setIsAttached(true)
 
     }, [])
 
@@ -149,6 +144,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
     useEffect(() => {
         if (mountedRefPaths.current !== 0) {
             setDown(true)
+            setIsFollowingShape(true)
             if (common.scale == scale.current && !getIsUndoAction()) // don`t call it when triggered buy undo/redo action
                 followShapes(objectSnapshot, shapeStartPath, true, followShapes(objectSnapshotBack, shapeEndPath, false))
             setObjectSnapshot(shapeStartPath)
@@ -164,50 +160,50 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
 
 
     function shapeChangeHandle(path, point, back = true) {
-        // const ctx = getContext(ref)
-        // const isPointOnTheLine = ctx.isPointInStroke(path.p, point.x, point.y);
-        // const isPointNearPathLeft = ctx.isPointInPath(path.p, point.x + path.w / 2, point.y);
-        // const isPointNearPathRight = ctx.isPointInPath(path.p, point.x - path.w / 2, point.y);
-        // if (!isPointOnTheLine) {
-        //     if (isPointNearPathLeft || isPointNearPathRight) {
-        //         let side = null
-        //         for (let i = 1; side === null; i++) {
-        //             if (ctx.isPointInStroke(path.p, point.x + i, point.y)) {
-        //                 side = true
-        //             }
-        //             if (ctx.isPointInStroke(path.p, point.x - i, point.y)) {
-        //                 side = false
-        //             }
-        //             if (side !== null) {
-        //                 const temp = back ?
-        //                     [{x: point.x + (side ? i : -i), y: point.y}, ...sample.points.slice(1)] :
-        //                     [...sample.points.slice(0, sample.points.length - 1), {
-        //                         x: point.x + (side ? i : -i),
-        //                         y: point.y
-        //                     }]
-        //
-        //                 const {endingAngle} = drawHightOrderCurve(temp, ctx, borders, common, style)
-        //                 setSample({
-        //                     ...sample.current,
-        //                     points: temp,
-        //                     angle: endingAngle,
-        //                 })
-        //
-        //                 setUpdate(!update)
-        //             }
-        //
-        //         }
-        //     }
-        // }
-        // refVersion.current = false
+        const ctx = getContext(ref)
+        const isPointOnTheLine = ctx.isPointInStroke(path.p, point.x, point.y);
+        const isPointNearPathLeft = ctx.isPointInPath(path.p, point.x + path.w / 2, point.y);
+        const isPointNearPathRight = ctx.isPointInPath(path.p, point.x - path.w / 2, point.y);
+
+        if (!isPointOnTheLine) {
+            if (isPointNearPathLeft || isPointNearPathRight) {
+            let side = null
+            for (let i = 1; (side === null && i < path.w / 2); i++) {
+                console.log(i)
+                if (ctx.isPointInStroke(path.p, point.x + i, point.y)) {
+                    side = true
+                }
+                if (ctx.isPointInStroke(path.p, point.x - i, point.y)) {
+                    side = false
+                }
+                if (side !== null) {
+                    const temp = back ?
+                        [{x: point.x + (side ? i : -i), y: point.y}, ...sample.current.points.slice(1)] :
+                        [...sample.current.points.slice(0, sample.current.points.length - 1), {
+                            x: point.x + (side ? i : -i),
+                            y: point.y
+                        }]
+
+                    // const endingAngle = getCurveArrowAngle(temp, borders, common)
+
+                    setSample({
+                        ...sample.current,
+                        points: temp,
+                        // angle: endingAngle,
+                    })
+
+                    setUpdate(!update)
+                }
+
+            }
+            }
+        }
+        refVersion.current = false
 
     }
 
 
     function followShapes(snapshot, currentPath, isForward, points?) {
-
-
-        // console.log('follow')
         if (snapshot !== null && snapshot !== undefined && currentPath !== undefined) {
             const isMoved = snapshot.center.x !== currentPath.center.x || snapshot.center.y !== currentPath.center.y
             const isScaled = snapshot.w !== currentPath.w || snapshot.h !== currentPath.h
@@ -246,9 +242,8 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
                 const result = [point, getAdditionalPoint(point, currentPath.center)]
                 temp.splice(isForward ? temp.length - 2 : 0, temp.length === 2 ? 1 : 2, ...(isForward ? result.reverse() : result))
 
-
                 // const ctx = getContext(ref)
-                const {cur, endingAngle} = getCurveArrowAngle(temp, borders, common, style)
+                const {cur, endingAngle} = getCurveArrowAngle(temp, borders, common)
                 setSample({
                     ...sample.current,
                     points: temp,
@@ -280,8 +275,14 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
 
 
     useClickOutside(container, (e) => {
-        if (e.target.nodeName !== "SPAN")
+        const isCurveControls = !e.target?.dataset?.curvecontrols && e.target.nodeName !== "SPAN"
+            && !e.target?.dataset?.popup
+        if (isCurveControls) {
             setEditMode(false)
+            e.target.blur()
+        } else {
+            e.target.focus()
+        }
     })
 
 
@@ -300,11 +301,8 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
     // }
 
     function handleMouseDown(e) {
-
+        e.preventDefault()
         if (isUsable !== "Selection" || e.button === 1) return;
-
-        // loop()
-
 
         setDown(true)
         setReplace({x: e.clientX, y: e.clientY})
@@ -316,20 +314,18 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
     function handleUp(e) {
         if (!down) return
 
+        batchGroupBy.confirmEnd()
         cancelAnimationFrame(requestAnimationFrameRef.current)
-
         dispatch(updateItem(getUpdates({
             ...sample.current,
-            // new: false,
-            // borders: checkForBorders(getPoints(sample.current.points)),
             borders: getBordersForSelection(sample.current.points),
         })))
         setDown(false)
+        setIsFollowingShape(false)
         setControlPoint('')
         setReplace({x: e.clientX, y: e.clientY})
         setUpdate(!update)
         setEditPoint(null)
-        // handleTop()
         dispatch(setEditStatus(false))
 
 
@@ -368,7 +364,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
 
     function handleMove(e) {
 
-        if (!down) return;
+        if (!down || isFollowingShape) return;
         e.preventDefault()
 
         const clientX = (e.clientX + common.scrollX) / common.scale
@@ -423,7 +419,6 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
             } else {
                 nPoint = {x: Math.round(clientX + del.x), y: Math.round(clientY + del.y)}
             }
-
 
 
             let isAlignmentNeeded = Array.isArray(nPoint)
@@ -481,9 +476,8 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
                 }
 
 
-                if (isNewOne === 1) {
+                if (isNewOne === 1 || back || forward) {
                     if (forward && cPointId >= temp.length - 1) {
-
                         temp.splice(newIndx - 1, deleteCount + removeCount + 1, newPoint)
                     } else if (back && cPointId === 0) {
                         temp.splice(0, deleteCount + removeCount + 1, newPoint)
@@ -511,7 +505,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
             }
 
 
-            const {endingAngle} = getCurveArrowAngle(temp, borders, common, style)
+            const {endingAngle} = getCurveArrowAngle(temp, borders, common)
 
 
             setSample({
@@ -631,8 +625,6 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
 
     function convertCubicToHighOrderCurve(nPoint, ctx) {
         let temp = [...sample.current.points]
-        // console.log(temp)
-        // console.log([...sample.current.points])
 
         const newIndx = ControlPoint.current * 1
         if (newIndx === 0)
@@ -706,6 +698,15 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
         }
     }
 
+    function handleRemove(e) {
+        if (e.key === "Backspace" || e.key === "Delete") {
+            setTimeout(() => {
+                dispatch(removeItem(curve.id))
+            }, 100)
+        }
+
+    }
+
 
     return {
         additionalPoints,
@@ -715,6 +716,7 @@ export function useCurve(curve, ref, sample, setSample, container, isUsable, bor
         handleUp,
         handleMouseDown,
         handleControlPointDown,
+        handleRemove,
         editMode,
         toggle: update,
         down,

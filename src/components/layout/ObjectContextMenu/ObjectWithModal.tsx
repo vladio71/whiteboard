@@ -1,5 +1,4 @@
 import React, {memo, useEffect, useRef, useState} from "react";
-import {Point} from "../../../app/page";
 import ShapeObject from "../../tools/Shape/ShapeObject";
 import CurveObject from "../../tools/BezierCurves/CurveObject";
 import DrawingObject from "../../tools/Drawing/DrawingObject";
@@ -9,9 +8,10 @@ import ContainerPopUp from "../EditingPopUp/ContainerPopUp";
 import {saveObjectInfo, removeItem} from "../../../redux/Slices/itemsSlice"
 import LinkModal from "./LinkModal";
 import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
+import {Point} from "../../../types/types";
 
 
-const ObjectWithModal = memo(({isUsable, handleBottom, handleTop, el}) => {
+const ObjectWithModal = memo(({handleBottom, handleTop, el}) => {
 
     const dispatch = useAppDispatch()
     const [isModalActive, setIsModalActive] = useState(false)
@@ -74,7 +74,6 @@ const ObjectWithModal = memo(({isUsable, handleBottom, handleTop, el}) => {
     }, [isModalActive])
 
 
-
     return (
         <>
             <div onContextMenu={handleModal}>
@@ -82,17 +81,13 @@ const ObjectWithModal = memo(({isUsable, handleBottom, handleTop, el}) => {
                     <ShapeObject
                         key={el.id}
                         item={el}
-                        isUsable={isUsable}
                     />
                     : el?.curve ?
-                        <CurveObject
-                            curve={el}
-                            isUsable={isUsable}
-                        />
+                        <CurveObject curve={el}/>
                         : el?.drawing ?
-                            <DrawingObject key={el.id} drawing={el} isUsable={isUsable}/>
+                            <DrawingObject key={el.id} drawing={el}/>
                             :
-                            <TextObject key={el.id} text={el} isUsable={isUsable}/>
+                            <TextObject key={el.id} text={el}/>
                 }
                 {isModalActive &&
                     <div style={modalStyle}>

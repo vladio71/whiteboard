@@ -9,7 +9,7 @@ import RemoveObject from "../../layout/utils/RemoveObject";
 import {batchGroupBy} from "../../../utils/batchGroupBy";
 
 
-const ShapeObject = ({item, isUsable}) => {
+const ShapeObject = ({item}) => {
 
     const dispatch = useAppDispatch()
 
@@ -25,14 +25,12 @@ const ShapeObject = ({item, isUsable}) => {
                 <ContainerResizeComponent
                     id={item.id}
                     editorObject={item}
-                    isUsable={isUsable}
                     renderProp={(object) => renderSwitch(object)}
                     renderEditor={(object) => <EditorComponent object={object} id={item.id}
                                                                style={{color: item.style?.color}}/>}
                     popUp={(object) => <EditingPopUp id={object.id} item={object}/>}
                     saveChanges={saveChanges}
                 >
-                    {/*<EditorComponent editable={true} id={item.id} style={{color: item.style?.color}}/>*/}
                 </ContainerResizeComponent>
 
             </RemoveObject>

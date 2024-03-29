@@ -1,16 +1,18 @@
-import {useContext, useEffect, useMemo, useRef, useState} from "react";
-import {LevelContext} from "../../../app/page";
-import {useAppSelector} from "../../../redux/hooks";
+import {useEffect, useMemo, useRef, useState} from "react";
+import {useAppDispatch, useAppSelector} from "../../../redux/hooks";
 import useClickOutside from "../../../hooks/useClickOutside";
 import {batchGroupBy} from "../../../utils/batchGroupBy";
+import {updateShapeId, updateStartPoint, updateTool} from "../../../redux/Slices/commonSlice";
+import {element} from "prop-types";
 
 
-export const useContainerResize = (editorObject, isUsable, child, container, saveChanges) => {
-
-    const level = useContext(LevelContext)
+export const useContainerResize = (editorObject, child, container, saveChanges) => {
 
 
+
+    const dispatch = useAppDispatch()
     const common = useAppSelector(state => state.present.common)
+    const isUsable = common.tool
     const [start, setStart] = useState({x: 0, y: 0})
     const [center, setCenter] = useState({
         x: editorObject.x + editorObject.w / 2,
@@ -43,7 +45,7 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
         outline: editMode ? "2px solid lightblue" : "none",
         transform: `rotate(${object?.angle}deg)`,
         transition: 'background .2s ease-out',
-        zIndex: 100,
+        // zIndex: 20
     }
     const overlayStyle = {
 
@@ -52,14 +54,14 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
         alignItems: "center",
         left: -10,
         top: -10,
-        width: (object.w + 60) * common.scale,
-        height: ((object.shape === "Circle" ? object.w : object.h) + 60) * common.scale,
+        width: (object.w) * common.scale + 40,
+        height: ((object.shape === "Circle" ? object.w : object.h)) * common.scale +40,
         padding: "10px",
     }
 
 
     useEffect(() => {
-        setObject({...editorObject, angle: object.angle}) // here is the gem
+        setObject({...editorObject, angle: object.angle}) // here is the gem that broke everything
     }, [editorObject.x, editorObject.y, editorObject.w, editorObject.h, editorObject?.shape])
 
     useEffect(() => {
@@ -380,9 +382,9 @@ export const useContainerResize = (editorObject, isUsable, child, container, sav
 
 
         setEditMode(false)
-        level?.setOption("Curve")
-        level?.setStart({x: (x + common.scrollX) / common.scale, y: (y + common.scrollY) / common.scale})
-        level?.setShapeId(editorObject.id)
+        dispatch(updateTool("Curve"))
+        dispatch(updateStartPoint({x: (x + common.scrollX) / common.scale, y: (y + common.scrollY) / common.scale}))
+        dispatch(updateShapeId(editorObject.id))
 
     }
 

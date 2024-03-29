@@ -78,24 +78,16 @@ export const useDrawing = (brush, drawingStyle, canvasRef, hiddenCanvasRef, ctx,
                 color: color,
                 thickness: thickness
             }
-            //
-            // dispatch(addDrawing({
-            //     ...drawing,
-            //     points: currentPoints.current.map(point => {
-            //         return {
-            //             x: point.x - drawing.startX + 50,
-            //             y: point.y - drawing.startY + 50
-            //         }
-            //     }),
-            //     drawing: true
-            // }))
+
             dispatch(addItem({
                 id: uuidv4(),
                 ...drawing,
                 points: currentPoints.current.map(point => {
                     return {
-                        x: point.x - drawing.startX + 50,
-                        y: point.y - drawing.startY + 50
+                        // x: point.x - drawing.startX + 50,
+                        // y: point.y - drawing.startY + 50
+                        x: point.x - drawing.startX + 10,
+                        y: point.y - drawing.startY + 10
                     }
                 }),
                 drawing: true
@@ -170,10 +162,6 @@ export const useDrawing = (brush, drawingStyle, canvasRef, hiddenCanvasRef, ctx,
         }
     }
 
-
-    // function getDistance(p1, p2) {
-    //     return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2))
-    // }
 
 
 }

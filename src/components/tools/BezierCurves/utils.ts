@@ -1,12 +1,13 @@
+import {getPointOnCurve} from "./CurvesCreationTool";
+
 export function getDefaultBezierControlPoints(start, end) {
     let cp1 = {x: (end.x - start.x) / 5 + start.x, y: ((end.y - start.y) / 5) * 4 + start.y};
     let cp2 = {x: ((end.x - start.x) / 5) * 4 + start.x, y: (end.y - start.y) / 5 + start.y};
     return {cp1, cp2}
 }
 
-export function makeCurve(start, end, path) {
+export function makeCurve(start, end) {
     const {cp1, cp2} = getDefaultBezierControlPoints(start, end)
-    // path.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, end.x, end.y);
     return {cp1, cp2}
 }
 
@@ -192,49 +193,56 @@ export function drawArrow(ctx, angle, point) {
     ctx.restore();
 }
 
-export function getCurveArrowAngle(points, borders, common, style) {
+export function getCurveArrowAngle(points, borders, common) {
 
-    // const cur = new Path2D()
 
     const pointsForRender = getPoints(points).map(p => {
         return {
-            // x: (p.x - borders.minX) * common.scale + 200,
-            // y: (p.y - borders.minY) * common.scale + 200
             x: p.x - (borders.minX) * common.scale + 200,
             y: p.y - (borders.minY) * common.scale + 200
         }
     })
-    // if (style?.line) {
-    //     if (style.line < 2) {
-    //
-    //         ctx.setLineDash([5, 15]);
-    //     } else {
-    //         ctx.setLineDash([3, 3]);
-    //
-    //     }
-    // }
-    // ctx.lineWidth = style?.thickness * 30 / 3 < 1 ? 1 : style?.thickness * 30 / 3
+
 
     const tStart = bezier(0.98, pointsForRender)
     const dx = pointsForRender[points.length - 1].x - tStart.x;
     const dy = pointsForRender[points.length - 1].y - tStart.y;
     const endingAngle = Math.atan2(dy, dx);
 
-
-    // makeHightOrderCurvePath(cur, pointsForRender)
-    // if (common.theme === "dark")
-    //     ctx.filter = 'invert(1)'
-    //
-    // // ctx.stroke(cur)
-    // drawArrow(ctx, endingAngle, pointsForRender[pointsForRender.length - 1])
     return {
-        // cur,
         endingAngle
     }
 
 }
 
-export function calculatePoints(pArr) {
+export function calculatePointOnCurve(plist, t) {
+    if (plist.length > 2) {
+        return bezier(t, getPoints(plist))
+    } else {
+        const start = plist[0]
+        const end = plist[1]
+        const {cp1, cp2} = getDefaultBezierControlPoints(start, end)
+        return getPointOnCurve(start, cp1, cp2, end, t)
+    }
+}
+
+export function calculatePointsForCurve(plist) {
+
+    if (plist.length > 2) {
+        return calculateHighOrderPoints(plist)
+    } else {
+        const start = plist[0]
+        const end = plist[1]
+        const {cp1, cp2} = getDefaultBezierControlPoints(start, end)
+        return {
+            addPoints: [getPointOnCurve(start, cp1, cp2, end, 0.5)],
+            points: plist
+        }
+    }
+}
+
+
+export function calculateHighOrderPoints(pArr) {
     const addPoints = []
     const points = []
     const samplePoints = [...pArr]

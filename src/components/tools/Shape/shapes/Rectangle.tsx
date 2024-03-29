@@ -33,7 +33,6 @@ export const ShapeConstructor = ({item, drawShapeFunction, drawPathsFunction}) =
     const contextRef = useRef(null)
 
 
-
     useEffect(() => {
         const canvas = canvasRef.current
         contextRef.current = canvas.getContext("2d")
@@ -48,7 +47,7 @@ export const ShapeConstructor = ({item, drawShapeFunction, drawPathsFunction}) =
             const prev = previousValueRef.current
             const stepW = Math.abs(prev.w - object.w)
             const stepH = Math.abs(prev.h - object.h)
-            if (stepH > 20 || stepH > 20) {
+            if (stepH > 20 || stepW > 20) {
                 const w = Math.abs(stepW / 20)
                 const h = Math.abs(stepH / 20)
                 for (let i = 0; (i < w || i < h); i++) {
@@ -73,19 +72,19 @@ export const ShapeConstructor = ({item, drawShapeFunction, drawPathsFunction}) =
         }
     }, [object.x, object.y, object.w, object.h])
 
-    useEffect(()=>{
+    useEffect(() => {
         canvasRef.current.width = object.w * common.scale + 200
         canvasRef.current.height = object.h * common.scale + 200
         drawOnce(object, contextRef.current)
-    },[object.angle, object.style, common.scale, common.theme])
+    }, [object.angle, object.style, common.scale, common.theme])
 
     function setNewPath() {
         const out = new Path2D()
         const inside = new Path2D()
         const p = new Path2D()
         drawPathsFunction(out, p, inside)
-        if (item.style !== undefined)
-            setShapeInfo(dispatch, item, out, p, inside, common.scale)
+        if (object.style !== undefined)
+            setShapeInfo(dispatch, object, out, p, inside, common.scale)
     }
 
     function drawOnce(item, ctx) {
@@ -125,7 +124,7 @@ export function setShapeInfo(dispatch, item, out, p, inside, scale = 1) {
         p: p,
         center: {
             x: (item.x + item.w / 2),
-            y: (item.y + (item.shape === "Circle" ? item.w : item.h) / 2)
+            y: (item.y + item.h / 2)
         },
         w: item.w * scale,
         h: item.h * scale,
@@ -137,8 +136,8 @@ export function setRectPath(dispatch, item, id) {
     const out = new Path2D()
     const inside = new Path2D()
     const p = new Path2D()
-    out.rect(item.x - 25, item.y - 25, item.w + 38, item.h + 38)
-    p.rect(item.x - 10, item.y - 10, item.w + 28, item.h + 28)
+    out.rect(item.x - 15, item.y - 15, item.w + 30, item.h + 30)
+    p.rect(item.x-10, item.y-10, item.w+20, item.h+20)
     inside.rect(item.x, item.y, item.w, item.h)
     setShapeInfo(dispatch, {...item, id: id}, out, p, inside)
 }

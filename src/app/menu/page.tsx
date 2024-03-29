@@ -14,22 +14,22 @@ import {ActionCreators} from "redux-undo";
 import LoaderPlaceHolder from "components/layout/utils/LoaderPlaceHolder";
 import {setWhiteboardData} from "redux/Slices/itemsSlice";
 
-export interface Point {
-    x: number,
-    y: number
-}
-
-interface Context {
-    setOption: Dispatch<string>,
-    option: string,
-    setStart: Dispatch<Point>,
-    setShapeId: Dispatch<number>,
-    start: Point,
-    shapeId: number,
-    zoomId: number,
-    setZoomId: Dispatch<number>,
-
-}
+// export interface Point {
+//     x: number,
+//     y: number
+// }
+//
+// interface Context {
+//     setOption: Dispatch<string>,
+//     option: string,
+//     setStart: Dispatch<Point>,
+//     setShapeId: Dispatch<number>,
+//     start: Point,
+//     shapeId: number,
+//     zoomId: number,
+//     setZoomId: Dispatch<number>,
+//
+// }
 
 const useOnMountRequest = (func) => {
 
@@ -48,7 +48,6 @@ const useOnMountRequest = (func) => {
 }
 
 
-export const LevelContext = createContext<Context | null>(null);
 
 
 function Home() {

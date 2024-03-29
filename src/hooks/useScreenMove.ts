@@ -1,31 +1,35 @@
 import {useEffect, useRef, useState} from "react";
 import {setTimeout} from "timers";
+import {useAppDispatch, useAppSelector} from "../redux/hooks";
+import {selectCommon, updateTool} from "../redux/Slices/commonSlice";
 
 
-export const useScreenMove = (ref, option, setOption) => {
+export const useScreenMove = (ref) => {
 
 
+    const common = useAppSelector(selectCommon)
+    const dispatch = useAppDispatch()
+    const tool = common.tool
+    const isUsed = tool === "Move"
     const [start, setStart] = useState({x: 0, y: 0})
-    const [previousOption, setPreviousOption] = useState(option)
+    const [previousOption, setPreviousOption] = useState(tool)
     const [scrollPosition, setScrollPosition] = useState({x: 0, y: 0})
     const [down, setDown] = useState(false)
     const counter = useRef(0)
-    const isUsed = option === "Move"
 
     useEffect(() => {
 
         const handleDown = (e) => {
             if (e.which == 2) {
                 e.preventDefault()
-                setPreviousOption(option)
-                setOption("Move")
+                setPreviousOption(tool)
+                dispatch(updateTool("Move"))
                 onMouseDown(e)
-                // setDown(true)
             }
         }
         const handleup = (e) => {
             if (e.which == 2) {
-                setOption(previousOption)
+                dispatch(updateTool(previousOption))
                 setDown(false)
             }
         }
@@ -36,7 +40,7 @@ export const useScreenMove = (ref, option, setOption) => {
             window.removeEventListener('mousedown', handleDown)
             window.removeEventListener('mouseup', handleup)
         }
-    }, [option, previousOption])
+    }, [tool, previousOption])
 
 
     useEffect(() => {

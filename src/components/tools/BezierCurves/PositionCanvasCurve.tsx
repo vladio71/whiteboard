@@ -6,7 +6,16 @@ import {drawArrow, getDefaultBezierControlPoints, getPoints, makeHightOrderCurve
 
 
 // let canvas, ctx
-const PositionCanvasCurve = ({canvasRef, curve, sample, down, common}) => {
+const PositionCanvasCurve = ({
+    canvasRef,
+    updateTemplateFromCurve,
+    curve,
+    sample,
+    down,
+    common,
+    // handleMouseDown,
+    // positionContainer
+}) => {
 
 
     const requestAnimationFrameRef = useRef(0)
@@ -50,14 +59,13 @@ const PositionCanvasCurve = ({canvasRef, curve, sample, down, common}) => {
         return () => {
             cancelAnimationFrame(requestAnimationFrameRef.current)
         }
-    }, [down, common.scale, sample.current.style, common.theme, curve])
+    }, [down, common.scale, sample.current.style, common.theme, curve, updateTemplateFromCurve])
 
 
     function draw(c, ctx, bords, end = null) {
         const style = sample.current?.style
         if (style?.line) {
             if (style.line < 2) {
-
                 ctx.setLineDash([5, 15]);
             } else {
                 ctx.setLineDash([3, 3]);
@@ -94,14 +102,21 @@ const PositionCanvasCurve = ({canvasRef, curve, sample, down, common}) => {
 
     const PositionStyle = {
         position: "absolute",
-        zIndex: -10,
+        // zIndex: 10,
         transform: `translate(${(borders.current?.minX) * common.scale - 200}px,${(borders.current?.minY) * common.scale - 200}px)`,
-        transition: '0s'
+        transition: '0s',
     }
 
     return (
-        <div style={PositionStyle} ref={positionContainer}>
-            <canvas ref={canvasRef}/>
+        <div style={PositionStyle}
+             ref={positionContainer}
+            // onMouseDown={handleMouseDown}
+            // tabIndex={1}
+
+        >
+            <canvas ref={canvasRef} style={{
+                pointerEvents: "none"
+            }}/>
         </div>
 
     )

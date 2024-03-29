@@ -4,7 +4,7 @@ import {updateItems, selectItems, setObjectInfo, getUpdates} from "../../../redu
 import {selectCommon} from "redux/Slices/commonSlice";
 
 
-const SelectionTool = ({isUsed}) => {
+const SelectionTool = () => {
 
 
     const dispatch = useAppDispatch()
@@ -17,11 +17,9 @@ const SelectionTool = ({isUsed}) => {
     const [style, setStyle] = useState({})
 
 
-    // const drawings = useAppSelector(selectDrawings)
-    // const curves = useAppSelector(selectCurves)
     const shapes = useAppSelector(selectItems)
-    // const texts = useAppSelector(selectTexts)
     const common = useAppSelector(selectCommon)
+    const isUsed = common.tool === "Selection"
 
 
     useEffect(() => {
@@ -78,7 +76,6 @@ const SelectionTool = ({isUsed}) => {
             })) return true
             return false
         }
-
 
 
         if (checkCollection(shapes, 'shape')) return
